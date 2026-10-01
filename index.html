@@ -18,6 +18,14 @@
   .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:20px}
   .hint,footer{color:var(--mut);font-size:12px}button.r{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px 10px;cursor:pointer}
   a{color:var(--ok)}
+  .ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:12px 0}
+  .ctl:first-of-type{border-top:0}.ctl b{display:block}.ctl .hint{font-family:ui-monospace,monospace}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}.btns button,.sched button{border:1px solid var(--line);background:none;color:var(--txt);border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit}
+  .btns .on{background:var(--ok);color:#0d1410;border-color:var(--ok)}.btns .off{background:var(--bad);color:#0d1410;border-color:var(--bad)}
+  .sched{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;border-top:1px solid var(--line);padding-top:12px}
+  .sched label{font-size:12px;color:var(--mut)}.sched input{display:block;margin-top:4px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px}
+  .sched .save{background:var(--ok);color:#0d1410;border-color:var(--ok)}
+  #msg{font-size:13px;margin-top:8px;min-height:18px}
 </style>
 </head>
 <body>
@@ -26,11 +34,22 @@
   <p class="hint">Tocá las tarjetas para sumar o quitar sensores del gráfico.</p>
   <div class="grid" id="cards"></div>
   <div class="panel"><div style="height:320px"><canvas id="chart"></canvas></div></div>
-  <p class="hint">Para controlar extractor y luz usá el panel seguro: <a href="https://pixel-perfect-showcase-5714.lovable.app">abrir control remoto</a>. Esta página es solo lectura y no contiene claves de control.</p>
+  <div class="panel">
+    <h2 style="margin:0 0 8px;font-size:16px">Control remoto</h2>
+    <div class="ctl"><div><b>Extractor</b><span class="hint">relé 1</span></div><div class="btns"><button class="on" onclick="cmd(['R1_ON'])">Encender</button><button class="off" onclick="cmd(['R1_OFF'])">Apagar</button><button onclick="cmd(['R1_AUTO'])">Automático</button></div></div>
+    <div class="ctl"><div><b>Luz</b><span class="hint">relé 3</span></div><div class="btns"><button class="on" onclick="cmd(['R3_ON'])">Encender</button><button class="off" onclick="cmd(['R3_OFF'])">Apagar</button><button onclick="cmd(['R3_AUTO'])">Automático</button></div></div>
+    <div class="sched"><b style="margin-right:auto">Horario de la luz</b>
+      <label>Enciende<input type="time" id="hon" value="06:00"></label>
+      <label>Apaga<input type="time" id="hoff" value="00:00"></label>
+      <button class="save" onclick="saveSched()">Guardar horario</button></div>
+    <div id="msg" class="hint"></div>
+  </div>
   <footer>Datos de ThingSpeak cada 10 min · se actualiza solo cada minuto</footer>
 </main>
 <script>
-// Clave de SOLO LECTURA (segura de publicar). Nunca pongas acá la clave de TalkBack.
+// Clave de SOLO LECTURA (segura de publicar). Nunca pongas acá la clave de TalkBack:
+// los comandos se mandan al servidor del panel, que guarda la clave.
+const API = "https://pixel-perfect-showcase-5714.lovable.app/api/public/command";
 const CHANNEL = 3411808, READ_KEY = "ING0ZIN3WLD2C52M";
 const S = [
   {f:"field1",l:"Temp. aire",u:"°C",s:"DHT22",c:"#4ade80",ok:v=>v>=25&&v<29,w:v=>v>=23&&v<30},
@@ -61,6 +80,18 @@ function render(){
   };
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#e6efe8"}}}}});
+}
+async function cmd(commands){
+  const m = document.getElementById("msg"); m.textContent = "Enviando…";
+  try{
+    const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commands})});
+    const j = await r.json();
+    m.textContent = j.ok ? commands.join(", ")+" en cola · el Arduino lo aplica en ~30 s" : "Error: "+(j.error||r.status);
+  }catch(e){ m.textContent = "Error de conexión con el panel"; }
+}
+function saveSched(){
+  const f = id => document.getElementById(id).value.replace(":","_");
+  cmd(["R3_HON_"+f("hon"),"R3_HOFF_"+f("hoff"),"R3_AUTO"]);
 }
 function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
 async function load(){
