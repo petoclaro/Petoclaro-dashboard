@@ -6,110 +6,164 @@
 <title>PetoClaro — Panel del cultivo</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-  :root{--bg:#0d1410;--card:#152019;--line:#24352a;--txt:#e6efe8;--mut:#8aa092;--ok:#4ade80;--warn:#facc15;--bad:#f87171}
-  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)}
-  h1{margin:0;font-size:18px}main{max-width:1100px;margin:auto;padding:24px 20px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;color:inherit;text-align:left;font:inherit}
-  .card.on{outline:2px solid var(--c)}.card small{color:var(--mut);display:flex;justify-content:space-between}
-  .val{font:600 28px ui-monospace,monospace;margin-top:10px}.val span{font-size:13px;color:var(--mut)}
-  .ok .val{color:var(--ok)}.warn .val{color:var(--warn)}.bad .val{color:var(--bad)}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:20px}
-  .hint,footer{color:var(--mut);font-size:12px}button.r{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px 10px;cursor:pointer}
-  a{color:var(--ok)}
-  .ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:12px 0}
-  .ctl:first-of-type{border-top:0}.ctl b{display:block}.ctl .hint{font-family:ui-monospace,monospace}
-  .btns{display:flex;gap:8px;flex-wrap:wrap}.btns button,.sched button{border:1px solid var(--line);background:none;color:var(--txt);border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit}
-  .btns .on{background:var(--ok);color:#0d1410;border-color:var(--ok)}.btns .off{background:var(--bad);color:#0d1410;border-color:var(--bad)}
-  .sched{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;border-top:1px solid var(--line);padding-top:12px}
-  .sched label{font-size:12px;color:var(--mut)}.sched input{display:block;margin-top:4px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px}
-  .sched .save{background:var(--ok);color:#0d1410;border-color:var(--ok)}
-  #msg{font-size:13px;margin-top:8px;min-height:18px}
+:root{--bg:#09090e;--card:#12121a;--line:#24243a;--txt:#eef0f8;--mut:#8b8ca8;--pri:#9b8cff;--live:#34d399;--bad:#f87171}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#16162a,var(--bg) 60%);background-attachment:fixed;color:var(--txt);font-family:Inter,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:#09090ed9;backdrop-filter:blur(8px)}
+.logo b{display:block;color:var(--pri);font-size:18px;letter-spacing:-.5px}.logo small{font:10px ui-monospace,monospace;letter-spacing:.3em;color:var(--mut)}
+.right{display:flex;gap:10px;align-items:center;font:12px ui-monospace,monospace;color:var(--mut)}
+.pill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--txt)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live)}.dot.off{background:var(--bad);box-shadow:none}
+button{font:inherit;cursor:pointer}.r{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:5px 10px}
+main{max-width:1280px;margin:auto;padding:20px;display:grid;gap:16px;grid-template-columns:1fr 340px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.alert{grid-column:1/-1;border:1px solid #f8717166;background:#f871710f;border-radius:12px;padding:12px 16px;font-size:14px}.alert b{color:var(--bad)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 0;color:inherit;text-align:center;overflow:hidden}
+.tile.off{opacity:.55}.tile .eye{position:absolute;right:8px;top:6px;font-size:12px}
+.tile .n{font:11px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut)}
+.tile .v{font:600 20px ui-monospace,monospace}.tile .v span{font-size:12px;color:var(--mut)}
+.tile .mm{font:11px ui-monospace,monospace}.tile svg{display:block;width:100%;height:32px;margin-top:4px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
+.foot{text-align:center;font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
+aside h3{font:12px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut);margin:0 0 10px;font-weight:400}
+aside h3 span{border:1px solid var(--line);border-radius:99px;padding:2px 8px;margin-left:6px}
+.dev{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px}
+.dev.lit{border-color:#9b8cff80;background:#9b8cff12}.dev .ic{font-size:30px}.dev b{display:block;margin-top:6px}
+.dev .st{font:12px ui-monospace,monospace;color:var(--mut);margin-bottom:12px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{flex:1;background:none;border:0;border-radius:6px;padding:7px;color:var(--mut);font:12px ui-monospace,monospace}
+.seg button.act{background:var(--pri);color:#0d0d18}.seg button.act.on{background:var(--live)}.seg button.act.off{background:var(--bad)}
+.seg button:disabled{opacity:.5}
+.sch{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;text-align:left}
+.sch .row{display:flex;gap:8px}.sch label{flex:1;font-size:12px;color:var(--mut)}
+.sch input{display:block;width:100%;margin-top:4px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px;color-scheme:dark}
+.hint{font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
+.save{width:100%;margin-top:8px;background:var(--pri);color:#0d0d18;border:0;border-radius:8px;padding:9px;font-weight:600}
+#msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;display:none}
 </style>
 </head>
 <body>
-<header><h1>PetoClaro</h1><div><span id="ts" class="hint"></span> <button class="r" onclick="load()">Actualizar</button></div></header>
+<header>
+  <div class="logo"><b>PETO</b><small>CLARO</small></div>
+  <div class="right"><span id="ts"></span><span class="pill"><span class="dot" id="dot"></span><span id="live">Live</span></span><button class="r" onclick="load()">↻</button></div>
+</header>
 <main>
-  <p class="hint">Tocá las tarjetas para sumar o quitar sensores del gráfico.</p>
-  <div class="grid" id="cards"></div>
-  <div class="panel"><div style="height:320px"><canvas id="chart"></canvas></div></div>
-  <div class="panel">
-    <h2 style="margin:0 0 8px;font-size:16px">Control remoto</h2>
-    <div class="ctl"><div><b>Extractor</b><span class="hint">relé 1</span></div><div class="btns"><button class="on" onclick="cmd(['R1_ON'])">Encender</button><button class="off" onclick="cmd(['R1_OFF'])">Apagar</button><button onclick="cmd(['R1_AUTO'])">Automático</button></div></div>
-    <div class="ctl"><div><b>Luz</b><span class="hint">relé 3</span></div><div class="btns"><button class="on" onclick="cmd(['R3_ON'])">Encender</button><button class="off" onclick="cmd(['R3_OFF'])">Apagar</button><button onclick="cmd(['R3_AUTO'])">Automático</button></div></div>
-    <div class="sched"><div style="margin-right:auto"><b>Horario de la luz</b><div class="hint" id="last">Sin horario guardado en este navegador</div></div>
-      <label>Enciende<input type="time" id="hon" value="06:00"></label>
-      <label>Apaga<input type="time" id="hoff" value="00:00"></label>
-      <button class="save" onclick="saveSched()">Guardar horario</button></div>
-    <div id="msg" class="hint"></div>
+  <div class="alert" id="alert" style="display:none"><b>Sin señal:</b> el Arduino no envía datos hace más de 25 minutos. Revisá la conexión.</div>
+  <div>
+    <div class="tiles" id="tiles"></div>
+    <div class="panel"><div style="height:420px"><canvas id="chart"></canvas></div><div class="foot" id="foot"></div></div>
   </div>
-  <footer>Datos de ThingSpeak cada 10 min · se actualiza solo cada minuto</footer>
+  <aside>
+    <h3>DISPOSITIVOS <span id="cnt">0 ACTIVOS</span></h3>
+    <div class="dev" id="d-R1"><div class="ic">✳</div><b>Extractor</b><div class="st" id="st-R1"></div><div class="seg" id="seg-R1"></div></div>
+    <div class="dev" id="d-R3"><div class="ic">☀</div><b>Iluminación</b><div class="st" id="st-R3"></div><div class="seg" id="seg-R3"></div>
+      <div class="sch">
+        <div class="row"><label>Enciende<input type="time" id="hon" value="06:00" oninput="photo()"></label><label>Apaga<input type="time" id="hoff" value="00:00" oninput="photo()"></label></div>
+        <div class="hint" id="photo"></div>
+        <button class="save" id="saveBtn" onclick="saveSched()">Guardar horario</button>
+        <div class="hint" id="last">Sin horario guardado · tarda ~90 s en aplicarse</div>
+      </div>
+    </div>
+  </aside>
 </main>
+<div id="msg"></div>
 <script>
-// Clave de SOLO LECTURA (segura de publicar). Nunca pongas acá la clave de TalkBack:
-// los comandos se mandan al servidor del panel, que guarda la clave.
+// Clave de SOLO LECTURA (segura de publicar). La clave de TalkBack queda en el servidor del panel.
 const API = "https://pixel-perfect-showcase-5714.lovable.app/api/public/command";
 const CHANNEL = 3411808, READ_KEY = "ING0ZIN3WLD2C52M";
 const S = [
-  {f:"field1",l:"Temp. aire",u:"°C",s:"DHT22",c:"#4ade80",ok:v=>v>=25&&v<29,w:v=>v>=23&&v<30},
-  {f:"field2",l:"Hum. aire",u:"%",s:"DHT22",c:"#60a5fa",ok:v=>v>=40&&v<=70,w:v=>v>=30&&v<=80},
-  {f:"field4",l:"DPV",u:"kPa",s:"calculado",c:"#facc15",ok:v=>v>=0.7&&v<=1.2,w:v=>v>=0.5&&v<=1.6},
-  {f:"field5",l:"T. suelo 20 cm",u:"°C",s:"DS18B20",c:"#fb923c",ok:v=>v>=20&&v<=22.9,w:v=>v>=18&&v<26},
-  {f:"field6",l:"T. suelo 40 cm",u:"°C",s:"DS18B20",c:"#f87171",ok:v=>v>=20&&v<=22.9,w:v=>v>=18&&v<26},
-  {f:"field7",l:"Hum. suelo 20 cm",u:"%",s:"FC-28",c:"#e879f9",ok:v=>v>=50&&v<=80,w:v=>v>=30&&v<=85},
-  {f:"field8",l:"Hum. suelo 40 cm",u:"%",s:"FC-28",c:"#22d3ee",ok:v=>v>=50&&v<=80,w:v=>v>=30&&v<=85},
+  {f:"field1",l:"TEMP",u:"°C",c:"#7dd3fc",d:1},
+  {f:"field2",l:"HUM",u:"%",c:"#a78bfa",d:0},
+  {f:"field4",l:"DPV",u:"kPa",c:"#5eead4",d:2},
+  {f:"field5",l:"T.SUELO 20",u:"°C",c:"#fbbf24",d:1},
+  {f:"field6",l:"T.SUELO 40",u:"°C",c:"#fde047",d:1},
+  {f:"field7",l:"H.SUELO 20",u:"%",c:"#f472b6",d:0},
+  {f:"field8",l:"H.SUELO 40",u:"%",c:"#67e8f9",d:0},
 ];
-let feeds = [], sel = new Set(["field1"]), chart;
-const num = x => { const n = parseFloat(x); return Number.isFinite(n) ? n : null; };
+let feeds=[], sel=new Set(["field1","field2","field4"]), chart, busy=false;
+let modes={R1:"AUTO",R3:"AUTO"}, saved=null;
+const num=x=>{const n=parseFloat(x);return Number.isFinite(n)?n:null;};
+const $=id=>document.getElementById(id);
 
+function spark(vals,c){
+  const v=vals.filter(x=>x!=null); if(v.length<2) return "<svg></svg>";
+  const mn=Math.min(...v),mx=Math.max(...v),r=mx-mn||1;
+  const p=v.map((x,i)=>`${i/(v.length-1)*100},${30-(x-mn)/r*26}`).join(" ");
+  return `<svg viewBox="0 0 100 32" preserveAspectRatio="none"><polyline points="${p}" fill="none" stroke="${c}" stroke-width="1.2" vector-effect="non-scaling-stroke" opacity=".8"/></svg>`;
+}
 function render(){
-  const last = feeds[feeds.length-1] || {};
-  document.getElementById("cards").innerHTML = S.map(s=>{
-    const v = num(last[s.f]); const st = v==null?"":s.ok(v)?"ok":s.w(v)?"warn":"bad";
-    return `<button class="card ${st} ${sel.has(s.f)?"on":""}" style="--c:${s.c}" onclick="tog('${s.f}')">
-      <small><span>● ${s.l}</span><span>${s.s}</span></small>
-      <div class="val">${v==null?"—":v.toFixed(s.u==="kPa"?2:1)}<span> ${s.u}</span></div></button>`;
+  const last=feeds[feeds.length-1]||{};
+  $("tiles").innerHTML=S.map(s=>{
+    const ser=feeds.map(f=>num(f[s.f])), vals=ser.filter(x=>x!=null), v=num(last[s.f]), on=sel.has(s.f);
+    const mm=vals.length?`<div class="mm" style="color:${s.c}">↓${Math.min(...vals).toFixed(s.d)} ↑${Math.max(...vals).toFixed(s.d)}</div>`:"";
+    return `<button class="tile ${on?"":"off"}" onclick="tog('${s.f}')"><span class="eye" style="color:${on?s.c:"#8b8ca8"}">${on?"◉":"○"}</span>
+      <div class="n">${s.l}</div><div class="v">${v==null?"—":v.toFixed(s.d)}<span>${s.u}</span></div>${mm}${spark(ser,s.c)}</button>`;
   }).join("");
-  const act = S.filter(s=>sel.has(s.f)), units = [...new Set(act.map(s=>s.u))];
-  const scales = {x:{ticks:{color:"#8aa092",maxTicksLimit:8},grid:{color:"#24352a"}}};
-  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",display:i<2,ticks:{color:"#8aa092"},grid:{color:i?"transparent":"#24352a"},title:{display:true,text:u,color:"#8aa092"}});
-  const data = {
-    labels: feeds.map(f=>new Date(f.created_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})),
-    datasets: act.map(s=>({label:`${s.l} (${s.u})`,data:feeds.map(f=>num(f[s.f])),borderColor:s.c,backgroundColor:s.c,yAxisID:s.u,pointRadius:0,borderWidth:2,tension:.3,spanGaps:true}))
-  };
-  if (chart) chart.destroy();
-  chart = new Chart(document.getElementById("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#e6efe8"}}}}});
+  const act=S.filter(s=>sel.has(s.f)), units=[...new Set(act.map(s=>s.u))];
+  const scales={x:{ticks:{color:"#8b8ca8",maxTicksLimit:8},grid:{color:"#1c1c2c"}}};
+  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",display:i<2,ticks:{color:"#8b8ca8"},grid:{color:i?"transparent":"#1c1c2c"}});
+  const data={labels:feeds.map(f=>new Date(f.created_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})),
+    datasets:act.map(s=>({label:`${s.l} (${s.u})`,data:feeds.map(f=>num(f[s.f])),borderColor:s.c,backgroundColor:s.c,yAxisID:s.u,pointRadius:0,borderWidth:1.6,tension:.3,spanGaps:true}))};
+  if(chart) chart.destroy();
+  chart=new Chart($("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#eef0f8",boxWidth:10}}}}});
+  $("foot").textContent=feeds.length+" muestras · escalas independientes · tocá los sensores para superponer";
+}
+function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
+
+function toast(t){ const m=$("msg"); m.textContent=t; m.style.display="block"; clearTimeout(toast.t); toast.t=setTimeout(()=>m.style.display="none",4000); }
+function renderDevices(){
+  const lab={R1:"AUTO · por temperatura",R3:"AUTO · "+(saved?saved.on+" a "+saved.off:"horario")};
+  ["R1","R3"].forEach(id=>{
+    const m=modes[id];
+    $("st-"+id).textContent=m==="AUTO"?lab[id]:m==="ON"?"MANUAL · ENCENDIDO":"MANUAL · APAGADO";
+    $("d-"+id).classList.toggle("lit",m!=="OFF");
+    $("seg-"+id).innerHTML=["AUTO","ON","OFF"].map(x=>`<button class="${x.toLowerCase()} ${m===x?"act":""}" ${busy?"disabled":""} onclick="setMode('${id}','${x}')">${x}</button>`).join("");
+  });
+  $("cnt").textContent=Object.values(modes).filter(m=>m!=="OFF").length+" ACTIVOS";
+  $("saveBtn").disabled=busy;
 }
 async function cmd(commands){
-  let ok=false; const m = document.getElementById("msg"); m.textContent = "Enviando…";
+  busy=true; renderDevices(); let ok=false;
   try{
-    const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commands})});
-    const j = await r.json(); ok = !!j.ok;
-    m.textContent = j.ok ? commands.join(", ")+" en cola · el Arduino lo aplica en ~30 s" : "Error: "+(j.error||r.status);
-  }catch(e){ m.textContent = "Error de conexión con el panel"; }
-  return ok;
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commands})});
+    const j=await r.json(); ok=!!j.ok;
+    toast(ok?"Enviado · el Arduino lo aplica en ~"+commands.length*30+" s":"Error: "+(j.error||r.status));
+  }catch(e){ toast("Error de conexión con el panel"); }
+  busy=false; renderDevices(); return ok;
 }
-function showSched(h){ document.getElementById("last").textContent = "Último horario configurado: "+h.on+" a "+h.off; }
+async function setMode(id,m){
+  if(await cmd([id+"_"+m])){ modes[id]=m; localStorage.setItem("pc-modos",JSON.stringify(modes)); renderDevices(); }
+}
+function photo(){
+  const t=s=>{const[a,b]=s.split(":").map(Number);return a*60+b;};
+  const h=(t($("hoff").value)-t($("hon").value)+1440)%1440/60;
+  $("photo").textContent=`Fotoperíodo ${h}h luz / ${24-h}h oscuridad`+(h>=16?" · vegetativo":h<=12?" · floración":"");
+}
 async function saveSched(){
-  const on = document.getElementById("hon").value, off = document.getElementById("hoff").value;
-  if (await cmd(["R3_HON_"+on.replace(":","_"),"R3_HOFF_"+off.replace(":","_"),"R3_AUTO"])){
-    localStorage.setItem("pc-horario", JSON.stringify({on,off})); showSched({on,off});
+  const on=$("hon").value, off=$("hoff").value;
+  if(await cmd(["R3_HON_"+on.replace(":","_"),"R3_HOFF_"+off.replace(":","_"),"R3_AUTO"])){
+    saved={on,off}; modes.R3="AUTO";
+    localStorage.setItem("pc-horario",JSON.stringify(saved)); localStorage.setItem("pc-modos",JSON.stringify(modes));
+    $("last").textContent="Último horario: "+on+" a "+off+" · tarda ~90 s en aplicarse"; renderDevices();
   }
 }
-try{ const h = JSON.parse(localStorage.getItem("pc-horario")||"null");
-  if (h && h.on && h.off){ document.getElementById("hon").value=h.on; document.getElementById("hoff").value=h.off; showSched(h); } }catch(e){}
-function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
+try{ const m=JSON.parse(localStorage.getItem("pc-modos")||"null"); if(m) modes=m;
+  const h=JSON.parse(localStorage.getItem("pc-horario")||"null");
+  if(h&&h.on&&h.off){ saved=h; $("hon").value=h.on; $("hoff").value=h.off; $("last").textContent="Último horario: "+h.on+" a "+h.off+" · tarda ~90 s en aplicarse"; } }catch(e){}
+renderDevices(); photo();
+
 async function load(){
   try{
-    const r = await fetch(`https://api.thingspeak.com/channels/${CHANNEL}/feeds.json?api_key=${READ_KEY}&results=144`);
-    feeds = (await r.json()).feeds || [];
-    const l = feeds[feeds.length-1];
-    document.getElementById("ts").textContent = l ? "última lectura " + new Date(l.created_at).toLocaleString("es-AR") : "sin datos";
+    const r=await fetch(`https://api.thingspeak.com/channels/${CHANNEL}/feeds.json?api_key=${READ_KEY}&results=144`);
+    feeds=(await r.json()).feeds||[];
+    const l=feeds[feeds.length-1], ts=l?new Date(l.created_at):null, stale=!ts||Date.now()-ts>25*60000;
+    $("ts").textContent=ts?ts.toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"sin datos";
+    $("dot").classList.toggle("off",stale); $("live").textContent=stale?"Sin señal":"Live";
+    $("alert").style.display=stale&&l?"block":"none";
     render();
-  }catch(e){ document.getElementById("ts").textContent = "error al leer ThingSpeak"; }
+  }catch(e){ $("ts").textContent="error al leer ThingSpeak"; }
 }
-load(); setInterval(load, 60000);
+load(); setInterval(load,60000);
 </script>
 </body>
 </html>
