@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PetoClaro Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,8 +35,9 @@
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   color-scheme: dark;
 }
+/* Solo aplica tema claro si el usuario lo activó explícitamente */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
+  :root[data-theme="light"] {
     --bg:       #f0f4f8;
     --bg2:      #ffffff;
     --bg3:      #e8f0f8;
@@ -403,6 +409,7 @@ body {
   <div class="hdr-right">
     <span id="sys-pill" class="status-pill pill-off">cargando…</span>
     <button class="btn-refresh" onclick="fetchData(true)" title="Actualizar ahora">↻ Ahora</button>
+    <button class="btn-refresh" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
     <span id="ts-hdr" class="hdr-ts">–</span>
   </div>
 </header>
@@ -838,38 +845,81 @@ const TALKBACK_ID  = '57896';
 const TALKBACK_KEY = '7DGDYNM6DPXSGM7C';
 
 async function enviarComando(cmd, btn) {
-  // Determinar qué relay y su div de estado
   const relay = cmd.startsWith('R1') ? 'r1' : 'r3';
   const stEl  = document.getElementById('st-' + relay);
+  const btns  = btn.closest('.ctrl-card').querySelectorAll('.ctrl-btn');
 
-  // Bloquear botones del card temporalmente
-  const btns = btn.closest('.ctrl-card').querySelectorAll('.ctrl-btn');
   btns.forEach(b => b.disabled = true);
-  stEl.className = 'ctrl-status';
+  stEl.className   = 'ctrl-status';
   stEl.textContent = '⏳ Enviando…';
 
   const url  = `https://api.thingspeak.com/talkbacks/${TALKBACK_ID}/commands.json`;
   const body = `api_key=${TALKBACK_KEY}&command_string=${cmd}`;
 
   try {
+    // Intento 1: fetch normal con CORS (ThingSpeak soporta CORS)
     const res = await fetch(url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body
     });
     if (res.ok) {
+      const data = await res.json().catch(() => ({}));
       stEl.className   = 'ctrl-status ok';
-      stEl.textContent = `✓ ${cmd} en cola · Arduino ejecuta en ~30 s`;
+      stEl.textContent = `✓ ${cmd} en cola (ID #${data.id || '?'}) · Arduino ~30 s`;
     } else {
-      throw new Error(`HTTP ${res.status}`);
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} – ${txt.slice(0,80)}`);
     }
   } catch(e) {
-    stEl.className   = 'ctrl-status err';
-    stEl.textContent = `✗ Error: ${e.message}`;
+    // Si el error es de red/CORS, probamos con no-cors como fallback
+    // (no podemos leer la respuesta, pero el comando igual llega a ThingSpeak)
+    if (e instanceof TypeError) {
+      try {
+        await fetch(url, {
+          method:  'POST',
+          mode:    'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body
+        });
+        stEl.className   = 'ctrl-status ok';
+        stEl.textContent = `✓ ${cmd} enviado (sin confirmación) · Arduino ~30 s`;
+      } catch(e2) {
+        stEl.className   = 'ctrl-status err';
+        stEl.textContent = `✗ Sin red: ${e2.message}`;
+      }
+    } else {
+      stEl.className   = 'ctrl-status err';
+      stEl.textContent = `✗ ${e.message}`;
+    }
   } finally {
     btns.forEach(b => b.disabled = false);
   }
 }
+
+// ─── TEMA ────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn  = document.getElementById('theme-btn');
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.setAttribute('data-theme', 'light');
+    btn.textContent = '☀️';
+    try { localStorage.setItem('pc-theme', 'light'); } catch(e) {}
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    btn.textContent = '🌙';
+    try { localStorage.setItem('pc-theme', 'dark'); } catch(e) {}
+  }
+}
+(function(){
+  try {
+    const t = localStorage.getItem('pc-theme');
+    if (t) {
+      document.documentElement.setAttribute('data-theme', t);
+      if (t === 'light') document.getElementById('theme-btn') && (document.getElementById('theme-btn').textContent = '☀️');
+    }
+  } catch(e) {}
+})();
 
 // ─── INIT ────────────────────────────────────────────────────────
 fetchData();
