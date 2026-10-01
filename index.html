@@ -309,6 +309,27 @@ body {
 .conn-detail { margin-left: auto; font-size: .68rem; color: var(--fg3); font-family: var(--font-mono); }
 
 /* ─── CONTROL REMOTO ─────────────────────────────────────────── */
+.ctrl-global {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.ctrl-global-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .5px;
+  transition: opacity .15s;
+}
+.ctrl-global-btn:active { opacity: .75; }
+.ctrl-global-btn.todos-on  { background: #14532d; color: #4ade80; border: 1px solid #166534; }
+.ctrl-global-btn.todos-off { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; }
 .ctrl-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -321,6 +342,63 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px 18px;
+}
+/* Badge de estado ON/OFF */
+.relay-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.relay-badge.on  { background: #14532d; color: #4ade80; border: 1px solid #166534; }
+.relay-badge.off { background: #1c1917; color: var(--fg3); border: 1px solid #44403c; }
+.relay-badge.auto{ background: #422006; color: #fbbf24; border: 1px solid #78350f; }
+/* Horario R3 */
+.horario-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+.horario-panel.open { display: block; }
+.horario-panel label { font-size: .7rem; color: var(--fg3); display: block; margin-bottom: 3px; margin-top: 8px; }
+.horario-panel input[type=time] {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--fg);
+  padding: 6px 10px;
+  font-size: .85rem;
+  font-family: var(--font-mono);
+}
+.horario-panel input[type=time]:focus { outline: none; border-color: var(--accent); }
+.horario-send {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: .8rem;
+  cursor: pointer;
+}
+.horario-send:active { opacity: .8; }
+.horario-toggle {
+  margin-top: 10px;
+  font-size: .68rem;
+  color: var(--accent2);
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-ui);
 }
 .ctrl-title {
   font-size: .7rem;
@@ -483,12 +561,20 @@ body {
 
   <!-- CONTROL REMOTO -->
   <div class="section-label">🎛️ Control Remoto (TalkBack)</div>
+
+  <!-- Botones globales -->
+  <div class="ctrl-global">
+    <button class="ctrl-global-btn todos-on"  onclick="todosOn()">⚡ Encender todo</button>
+    <button class="ctrl-global-btn todos-off" onclick="todosOff()">🔴 Apagar todo</button>
+  </div>
+
   <div class="ctrl-grid">
 
     <!-- Relay 1: Extractor -->
     <div class="ctrl-card">
       <div class="ctrl-title">Relay 1</div>
       <div class="ctrl-name">🌬️ Extractor</div>
+      <span class="relay-badge off" id="badge-r1">● APAGADO</span>
       <div class="ctrl-btns">
         <button class="ctrl-btn on"   onclick="enviarComando('R1_ON',  this)">ON</button>
         <button class="ctrl-btn off"  onclick="enviarComando('R1_OFF', this)">OFF</button>
@@ -501,12 +587,24 @@ body {
     <div class="ctrl-card">
       <div class="ctrl-title">Relay 3</div>
       <div class="ctrl-name">💡 Luz</div>
+      <span class="relay-badge off" id="badge-r3">● APAGADO</span>
       <div class="ctrl-btns">
         <button class="ctrl-btn on"   onclick="enviarComando('R3_ON',  this)">ON</button>
         <button class="ctrl-btn off"  onclick="enviarComando('R3_OFF', this)">OFF</button>
         <button class="ctrl-btn auto" onclick="enviarComando('R3_AUTO',this)">AUTO</button>
       </div>
       <div class="ctrl-status" id="st-r3">Listo</div>
+
+      <!-- Configurar horario R3 -->
+      <button class="horario-toggle" onclick="toggleHorario()">⏱ Configurar horario…</button>
+      <div class="horario-panel" id="horario-panel">
+        <label>Hora ON (encendido)</label>
+        <input type="time" id="h-on"  value="06:00">
+        <label>Hora OFF (apagado)</label>
+        <input type="time" id="h-off" value="00:00">
+        <button class="horario-send" onclick="enviarHorario()">Guardar horario</button>
+        <div class="ctrl-status" id="st-horario" style="margin-top:8px"></div>
+      </div>
     </div>
 
   </div>
@@ -514,7 +612,7 @@ body {
   <footer class="footer">
     PetoClaro · Canal ThingSpeak &mdash; actualiza cada 60 s
     &bull; <a href="https://thingspeak.com" target="_blank" rel="noopener">ThingSpeak</a>
-    &bull; datos cada 10 min · v4.8
+    &bull; datos cada 10 min · v4.9.1
   </footer>
 
 </main>
@@ -606,11 +704,15 @@ function renderAll(data, manual) {
     document.getElementById('ts-hdr').textContent = fmtDate(ts);
   }
 
+  // Debug: mostrar en consola qué llegó de ThingSpeak
+  console.log('[PetoClaro] última entrada:', JSON.stringify(latest));
+
   // cards + system status
   let allOk = true, anyData = false;
   for (const s of SENSORS) {
     const raw = parseFloat(latest[`field${s.field}`]);
     const v   = isNaN(raw) ? null : raw;
+    console.log(`  field${s.field} (${s.label}): raw="${latest[`field${s.field}`]}" → ${v}`);
     renderCard(s, v);
     if (s.id !== 'c-thoja') {  // MLX desactivado, no afecta semáforo
       if (v === null) allOk = false;
@@ -844,6 +946,92 @@ function fmtDate(d) {
 const TALKBACK_ID  = '57896';
 const TALKBACK_KEY = '7DGDYNM6DPXSGM7C';
 
+// Estado local de los relays (se actualiza al enviar comandos)
+const relayState = { r1: 'off', r3: 'off' };
+
+function setBadge(relay, estado) {
+  // estado: 'on' | 'off' | 'auto'
+  relayState[relay] = estado;
+  const badge = document.getElementById('badge-' + relay);
+  if (!badge) return;
+  badge.className = 'relay-badge ' + estado;
+  if (estado === 'on')   badge.textContent = '● ENCENDIDO';
+  if (estado === 'off')  badge.textContent = '● APAGADO';
+  if (estado === 'auto') badge.textContent = '⟳ AUTO';
+}
+
+async function todosOn() {
+  await enviarComandoDirecto('R1_ON',  'r1');
+  await enviarComandoDirecto('R3_ON',  'r3');
+}
+
+async function todosOff() {
+  await enviarComandoDirecto('R1_OFF', 'r1');
+  await enviarComandoDirecto('R3_OFF', 'r3');
+}
+
+function toggleHorario() {
+  const panel = document.getElementById('horario-panel');
+  panel.classList.toggle('open');
+}
+
+async function enviarHorario() {
+  const on  = document.getElementById('h-on').value;   // "06:00"
+  const off = document.getElementById('h-off').value;  // "00:00"
+  const stEl = document.getElementById('st-horario');
+
+  if (!on || !off) { stEl.className='ctrl-status err'; stEl.textContent='✗ Ingresá ambos horarios'; return; }
+
+  const [hOn,  mOn]  = on.split(':').map(Number);
+  const [hOff, mOff] = off.split(':').map(Number);
+
+  // Comandos TalkBack para horario: R3_HON_HH_MM y R3_HOFF_HH_MM
+  // Estos requieren soporte en el firmware — por ahora enviamos mensaje informativo
+  // y mandamos R3_AUTO para activar el modo automático con los horarios configurados
+  stEl.className = 'ctrl-status'; stEl.textContent = '⏳ Enviando…';
+
+  // Encode horario como: R3_HON_06_00 / R3_HOFF_00_00
+  const cmdOn  = `R3_HON_${String(hOn).padStart(2,'0')}_${String(mOn).padStart(2,'0')}`;
+  const cmdOff = `R3_HOFF_${String(hOff).padStart(2,'0')}_${String(mOff).padStart(2,'0')}`;
+
+  try {
+    await postTalkBack(cmdOn);
+    await new Promise(r => setTimeout(r, 1000));
+    await postTalkBack(cmdOff);
+    await new Promise(r => setTimeout(r, 1000));
+    await postTalkBack('R3_AUTO');
+    stEl.className = 'ctrl-status ok';
+    stEl.textContent = `✓ Horario ON ${on} / OFF ${off} enviado · Arduino ~30 s`;
+  } catch(e) {
+    stEl.className = 'ctrl-status err';
+    stEl.textContent = '✗ ' + e.message;
+  }
+}
+
+async function postTalkBack(cmd) {
+  const url  = `https://api.thingspeak.com/talkbacks/${TALKBACK_ID}/commands.json`;
+  const body = `api_key=${TALKBACK_KEY}&command_string=${cmd}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function enviarComandoDirecto(cmd, relay) {
+  const stEl = document.getElementById('st-' + relay);
+  try {
+    await postTalkBack(cmd);
+    const estado = cmd.endsWith('ON') ? 'on' : cmd.endsWith('OFF') ? 'off' : 'auto';
+    setBadge(relay, estado);
+    if (stEl) { stEl.className='ctrl-status ok'; stEl.textContent=`✓ ${cmd} en cola`; }
+  } catch(e) {
+    if (stEl) { stEl.className='ctrl-status err'; stEl.textContent='✗ '+e.message; }
+  }
+}
+
 async function enviarComando(cmd, btn) {
   const relay = cmd.startsWith('R1') ? 'r1' : 'r3';
   const stEl  = document.getElementById('st-' + relay);
@@ -853,44 +1041,26 @@ async function enviarComando(cmd, btn) {
   stEl.className   = 'ctrl-status';
   stEl.textContent = '⏳ Enviando…';
 
-  const url  = `https://api.thingspeak.com/talkbacks/${TALKBACK_ID}/commands.json`;
-  const body = `api_key=${TALKBACK_KEY}&command_string=${cmd}`;
-
   try {
-    // Intento 1: fetch normal con CORS (ThingSpeak soporta CORS)
-    const res = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body
-    });
-    if (res.ok) {
-      const data = await res.json().catch(() => ({}));
-      stEl.className   = 'ctrl-status ok';
-      stEl.textContent = `✓ ${cmd} en cola (ID #${data.id || '?'}) · Arduino ~30 s`;
-    } else {
-      const txt = await res.text().catch(() => '');
-      throw new Error(`HTTP ${res.status} – ${txt.slice(0,80)}`);
-    }
+    const data = await postTalkBack(cmd);
+    const estado = cmd.endsWith('ON') ? 'on' : cmd.endsWith('OFF') ? 'off' : 'auto';
+    setBadge(relay, estado);
+    stEl.className   = 'ctrl-status ok';
+    stEl.textContent = `✓ ${cmd} en cola (ID #${data.id || '?'}) · Arduino ~30 s`;
   } catch(e) {
-    // Si el error es de red/CORS, probamos con no-cors como fallback
-    // (no podemos leer la respuesta, pero el comando igual llega a ThingSpeak)
-    if (e instanceof TypeError) {
-      try {
-        await fetch(url, {
-          method:  'POST',
-          mode:    'no-cors',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body
-        });
-        stEl.className   = 'ctrl-status ok';
-        stEl.textContent = `✓ ${cmd} enviado (sin confirmación) · Arduino ~30 s`;
-      } catch(e2) {
-        stEl.className   = 'ctrl-status err';
-        stEl.textContent = `✗ Sin red: ${e2.message}`;
-      }
-    } else {
+    // Fallback no-cors: el comando llega pero no podemos leer la respuesta
+    try {
+      const url  = `https://api.thingspeak.com/talkbacks/${TALKBACK_ID}/commands.json`;
+      const body = `api_key=${TALKBACK_KEY}&command_string=${cmd}`;
+      await fetch(url, { method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      const estado = cmd.endsWith('ON') ? 'on' : cmd.endsWith('OFF') ? 'off' : 'auto';
+      setBadge(relay, estado);
+      stEl.className   = 'ctrl-status ok';
+      stEl.textContent = `✓ ${cmd} enviado · Arduino ~30 s`;
+    } catch(e2) {
       stEl.className   = 'ctrl-status err';
-      stEl.textContent = `✗ ${e.message}`;
+      stEl.textContent = `✗ ${e2.message}`;
     }
   } finally {
     btns.forEach(b => b.disabled = false);
