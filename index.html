@@ -1,253 +1,876 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetoClaro Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
-:root {
-  --bg:#080b10;--bg2:#0d1117;--bg3:#141a24;--border:#1e2d3d;--border2:#263042;
-  --fg:#e2e8f0;--fg2:#94a3b8;--fg3:#4a5568;--green:#22c55e;--yellow:#eab308;
-  --red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--accent:#10b981;--accent2:#34d399;
-  --font-ui:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;
-  color-scheme:dark;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:var(--font-ui);background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5}
-.hdr{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:14px}
-.logo{font-size:1.1rem;font-weight:700;letter-spacing:2px;color:var(--accent2);font-family:var(--font-mono)}
-.logo em{color:var(--fg2);font-style:normal}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px}
-.live-badge{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--accent2);font-size:.7rem;font-weight:600;letter-spacing:1px;padding:4px 10px;border-radius:20px;text-transform:uppercase}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.status-pill{font-size:.7rem;font-weight:600;padding:4px 11px;border-radius:20px;letter-spacing:.5px}
-.pill-ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#4ade80}
-.pill-warn{background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.3);color:#fbbf24}
-.pill-err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171}
-.pill-off{background:rgba(75,85,99,.12);border:1px solid rgba(75,85,99,.3);color:#9ca3af}
-.hdr-ts{font-family:var(--font-mono);font-size:.7rem;color:var(--fg3)}
-.wrap{max-width:1100px;margin:0 auto;padding:24px 20px 48px}
-.section-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--fg3);margin:28px 0 12px;display:flex;align-items:center;gap:8px}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.c-ok::before{background:var(--green)}.c-warn::before{background:var(--yellow)}
-.c-crit::before{background:var(--red)}.c-off::before{background:var(--fg3)}
-.c-purple::before{background:var(--purple)}
-.card-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1.8px;color:var(--fg3);font-weight:600;margin-bottom:10px}
-.card-val{font-family:var(--font-mono);font-size:2.1rem;font-weight:700;line-height:1;margin-bottom:4px}
-.card-unit{font-size:.85rem;font-weight:400;color:var(--fg2)}
-.card-sub{font-size:.67rem;color:var(--fg3);margin-top:7px;line-height:1.4}
-.v-ok{color:var(--green)}.v-warn{color:var(--yellow)}.v-crit{color:var(--red)}
-.v-off{color:var(--fg3)}.v-purple{color:#a78bfa}
-.sparks{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
-.spark-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.spark-title{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--fg2);font-weight:600;margin-bottom:10px}
-.spark-row{display:flex;align-items:flex-end;gap:14px}
-.spark-num{flex-shrink:0;width:72px}
-.spark-big{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;line-height:1}
-.spark-range{font-size:.6rem;color:var(--fg3);margin-top:4px;font-family:var(--font-mono)}
-.spark-canvas{flex:1;height:56px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.stat-card-title{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--fg3);font-weight:600;margin-bottom:10px}
-.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem}
-.stat-row:last-child{border-bottom:none}
-.stat-key{color:var(--fg2)}.stat-val{font-family:var(--font-mono);font-weight:600}
-.sv-ok{color:var(--green)}.sv-warn{color:var(--yellow)}.sv-crit{color:var(--red)}
-.conn-bar{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:.78rem;color:var(--fg2);flex-wrap:wrap}
-.conn-ok{border-color:rgba(34,197,94,.3);color:var(--green)}
-.conn-err{border-color:rgba(239,68,68,.3);color:#f87171}
-.conn-detail{margin-left:auto;font-size:.68rem;color:var(--fg3);font-family:var(--font-mono)}
-.footer{text-align:center;font-size:.65rem;color:var(--fg3);padding-top:32px;font-family:var(--font-mono)}
-.footer a{color:var(--fg3);text-decoration:none;border-bottom:1px solid var(--border)}
-.skel{background:linear-gradient(90deg,var(--bg3) 25%,var(--border) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block;height:2em;width:70%}
-@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
-.btn-refresh{background:var(--bg3);border:1px solid var(--border2);color:var(--fg2);border-radius:6px;padding:5px 12px;font-size:.72rem;cursor:pointer}
-</style>
-</head>
-<body>
 
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────────────
+   Dark-first design: PetoClaro aesthetic (dark bg, green accents)
+   Layout: sticky header + sensor cards grid + chart section
+──────────────────────────────────────────────────────────────── */
+:root {
+  --bg:        #080b10;
+  --bg2:       #0d1117;
+  --bg3:       #141a24;
+  --border:    #1e2d3d;
+  --border2:   #263042;
+  --fg:        #e2e8f0;
+  --fg2:       #94a3b8;
+  --fg3:       #4a5568;
+  --green:     #22c55e;
+  --green-dim: #166534;
+  --yellow:    #eab308;
+  --red:       #ef4444;
+  --blue:      #3b82f6;
+  --purple:    #8b5cf6;
+  --accent:    #10b981;
+  --accent2:   #34d399;
+  --font-ui:   'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:       #f0f4f8;
+    --bg2:      #ffffff;
+    --bg3:      #e8f0f8;
+    --border:   #c8d8e8;
+    --border2:  #b0c8dc;
+    --fg:       #1a2840;
+    --fg2:      #475569;
+    --fg3:      #94a3b8;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg:       #f0f4f8;
+  --bg2:      #ffffff;
+  --bg3:      #e8f0f8;
+  --border:   #c8d8e8;
+  --border2:  #b0c8dc;
+  --fg:       #1a2840;
+  --fg2:      #475569;
+  --fg3:      #94a3b8;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ─── HEADER ──────────────────────────────────────────────────── */
+.hdr {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent2);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.logo em { color: var(--fg2); font-style: normal; }
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(16,185,129,.12);
+  border: 1px solid rgba(16,185,129,.3);
+  color: var(--accent2);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent2);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+.status-pill {
+  font-size: .7rem; font-weight: 600;
+  padding: 4px 11px; border-radius: 20px;
+  letter-spacing: .5px;
+}
+.pill-ok   { background: rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); color:#4ade80; }
+.pill-warn { background: rgba(234,179,8,.12);  border:1px solid rgba(234,179,8,.3);  color:#fbbf24; }
+.pill-err  { background: rgba(239,68,68,.12);  border:1px solid rgba(239,68,68,.3);  color:#f87171; }
+.pill-off  { background: rgba(75,85,99,.12);   border:1px solid rgba(75,85,99,.3);   color:#9ca3af; }
+.hdr-ts {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  color: var(--fg3);
+  white-space: nowrap;
+}
+
+/* ─── MAIN CONTENT ────────────────────────────────────────────── */
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+.section-label {
+  font-size: .65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--fg3);
+  margin: 28px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── SENSOR CARDS GRID ───────────────────────────────────────── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 500px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.card:hover { border-color: var(--border2); }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.c-ok::before    { background: var(--green); }
+.c-warn::before  { background: var(--yellow); }
+.c-crit::before  { background: var(--red); }
+.c-info::before  { background: var(--blue); }
+.c-off::before   { background: var(--fg3); }
+.c-purple::before{ background: var(--purple); }
+
+.card-label {
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--fg3);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.card-val {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.card-unit { font-size: .85rem; font-weight: 400; color: var(--fg2); }
+.card-sub  { font-size: .67rem; color: var(--fg3); margin-top: 7px; line-height: 1.4; }
+
+.v-ok   { color: var(--green); }
+.v-warn { color: var(--yellow); }
+.v-crit { color: var(--red); }
+.v-info { color: #60a5fa; }
+.v-off  { color: var(--fg3); }
+.v-purple{ color: #a78bfa; }
+
+/* ─── SPARKLINES ──────────────────────────────────────────────── */
+.sparks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 12px;
+}
+.spark-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.spark-title {
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg2);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.spark-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+.spark-num {
+  flex-shrink: 0;
+  width: 72px;
+}
+.spark-big {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.spark-range {
+  font-size: .6rem;
+  color: var(--fg3);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+.spark-canvas { flex: 1; height: 56px; }
+
+/* ─── STATS TABLE ─────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.stat-card-title {
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg3);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .8rem;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-key { color: var(--fg2); }
+.stat-val { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.sv-ok   { color: var(--green); }
+.sv-warn { color: var(--yellow); }
+.sv-crit { color: var(--red); }
+
+/* ─── CONNECTION ──────────────────────────────────────────────── */
+.conn-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: .78rem;
+  color: var(--fg2);
+  flex-wrap: wrap;
+}
+.conn-ok   { border-color: rgba(34,197,94,.3); color: var(--green); }
+.conn-err  { border-color: rgba(239,68,68,.3);  color: #f87171; }
+.conn-icon { font-size: 1rem; }
+.conn-detail { margin-left: auto; font-size: .68rem; color: var(--fg3); font-family: var(--font-mono); }
+
+/* ─── CONTROL REMOTO ─────────────────────────────────────────── */
+.ctrl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media(max-width:540px){ .ctrl-grid { grid-template-columns: 1fr; } }
+.ctrl-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.ctrl-title {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg3);
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+}
+.ctrl-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+.ctrl-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ctrl-btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 18px;
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  transition: opacity .15s, transform .1s;
+  flex: 1;
+  min-width: 60px;
+}
+.ctrl-btn:active { transform: scale(.96); }
+.ctrl-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ctrl-btn.on  { background: #14532d; color: #4ade80; border: 1px solid #166534; }
+.ctrl-btn.off { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; }
+.ctrl-btn.auto{ background: #422006; color: #fbbf24; border: 1px solid #78350f; }
+.ctrl-status  { font-size: .68rem; color: var(--fg3); margin-top: 9px; font-family: var(--font-mono); min-height: 1.2em; }
+.ctrl-status.ok  { color: #4ade80; }
+.ctrl-status.err { color: #f87171; }
+
+/* ─── FOOTER ──────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  font-size: .65rem;
+  color: var(--fg3);
+  padding-top: 32px;
+  font-family: var(--font-mono);
+  letter-spacing: .5px;
+}
+.footer a { color: var(--fg3); text-decoration: none; border-bottom: 1px solid var(--border); }
+.footer a:hover { color: var(--fg2); }
+
+/* ─── LOADING skeleton ────────────────────────────────────────── */
+.skel {
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--border) 50%, var(--bg3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  display: inline-block;
+  height: 2em;
+  width: 70%;
+}
+@keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+/* ─── MANUAL REFRESH btn ──────────────────────────────────────── */
+.btn-refresh {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--fg2);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: .72rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-refresh:hover { background: var(--border); color: var(--fg); }
+.btn-refresh:active { background: var(--border2); }
+</style>
+
+<!-- HEADER -->
 <header class="hdr">
   <div class="logo">PETO<em>CLARO</em></div>
   <div class="live-badge"><div class="live-dot"></div>Live</div>
   <div class="hdr-right">
     <span id="sys-pill" class="status-pill pill-off">cargando…</span>
-    <button class="btn-refresh" onclick="fetchData(true)">↻ Ahora</button>
+    <button class="btn-refresh" onclick="fetchData(true)" title="Actualizar ahora">↻ Ahora</button>
     <span id="ts-hdr" class="hdr-ts">–</span>
   </div>
 </header>
 
 <main class="wrap">
+
+  <!-- connection status -->
   <div id="conn-bar" class="conn-bar">
-    <span>⏳</span>
+    <span class="conn-icon">⏳</span>
     <span id="conn-text">Conectando a ThingSpeak…</span>
     <span id="conn-detail" class="conn-detail"></span>
   </div>
 
+  <!-- AMBIENTE -->
   <div class="section-label">🌡 Ambiente</div>
   <div class="cards">
-    <div id="c-taire" class="card c-off"><div class="card-label">Temp Aire</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">DHT22 · Óptimo 25–28 °C</div></div>
-    <div id="c-haire" class="card c-off"><div class="card-label">Hum Aire</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">DHT22 · Ref. 40–70%</div></div>
-    <div id="c-dpv" class="card c-off"><div class="card-label">DPV</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">0.7–1.2 kPa óptimo</div></div>
-    <div id="c-thoja" class="card c-purple"><div class="card-label">Temp Hoja</div><div class="card-val v-purple">– –</div><div class="card-sub">MLX90614 · sin datos</div></div>
+    <div id="c-taire" class="card c-off">
+      <div class="card-label">Temp Aire</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">DHT22 · Óptimo 25–28 °C</div>
+    </div>
+    <div id="c-haire" class="card c-off">
+      <div class="card-label">Hum Aire</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">DHT22 · Ref. 40–70%</div>
+    </div>
+    <div id="c-dpv" class="card c-off">
+      <div class="card-label">DPV</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">0.7–1.2 kPa óptimo</div>
+    </div>
+    <div id="c-thoja" class="card c-purple">
+      <div class="card-label">Temp Hoja</div>
+      <div class="card-val v-purple">– –</div>
+      <div class="card-sub">MLX90614 · sin datos</div>
+    </div>
   </div>
 
+  <!-- SUELO -->
   <div class="section-label">🌱 Suelo</div>
   <div class="cards">
-    <div id="c-ts20" class="card c-off"><div class="card-label">T. Suelo 20cm</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">DS18B20 · Óptimo 20–22.9 °C</div></div>
-    <div id="c-ts40" class="card c-off"><div class="card-label">T. Suelo 40cm</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">DS18B20 · Óptimo 20–22.9 °C</div></div>
-    <div id="c-hs20" class="card c-off"><div class="card-label">Hum. Suelo 20cm</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">FC-28 · Óptimo 50–80%</div></div>
-    <div id="c-hs40" class="card c-off"><div class="card-label">Hum. Suelo 40cm</div><div class="card-val v-off"><span class="skel"></span></div><div class="card-sub">FC-28 · Óptimo 50–80%</div></div>
+    <div id="c-ts20" class="card c-off">
+      <div class="card-label">T. Suelo 20cm</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">DS18B20 · Óptimo 20–22.9 °C</div>
+    </div>
+    <div id="c-ts40" class="card c-off">
+      <div class="card-label">T. Suelo 40cm</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">DS18B20 · Óptimo 20–22.9 °C</div>
+    </div>
+    <div id="c-hs20" class="card c-off">
+      <div class="card-label">Hum. Suelo 20cm</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">FC-28 · Óptimo 50–80%</div>
+    </div>
+    <div id="c-hs40" class="card c-off">
+      <div class="card-label">Hum. Suelo 40cm</div>
+      <div class="card-val v-off"><span class="skel"></span></div>
+      <div class="card-sub">FC-28 · Óptimo 50–80%</div>
+    </div>
   </div>
 
+  <!-- HISTORICO (sparklines) -->
   <div class="section-label">📈 Últimas 24 h</div>
   <div class="sparks" id="spark-section"></div>
 
+  <!-- MIN / MAX / PROM -->
   <div class="section-label">📊 Resumen (últimas 40 lecturas)</div>
   <div class="stats-grid" id="stats-section"></div>
 
+  <!-- CONTROL REMOTO -->
+  <div class="section-label">🎛️ Control Remoto (TalkBack)</div>
+  <div class="ctrl-grid">
+
+    <!-- Relay 1: Extractor -->
+    <div class="ctrl-card">
+      <div class="ctrl-title">Relay 1</div>
+      <div class="ctrl-name">🌬️ Extractor</div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn on"   onclick="enviarComando('R1_ON',  this)">ON</button>
+        <button class="ctrl-btn off"  onclick="enviarComando('R1_OFF', this)">OFF</button>
+        <button class="ctrl-btn auto" onclick="enviarComando('R1_AUTO',this)">AUTO</button>
+      </div>
+      <div class="ctrl-status" id="st-r1">Listo</div>
+    </div>
+
+    <!-- Relay 3: Luz -->
+    <div class="ctrl-card">
+      <div class="ctrl-title">Relay 3</div>
+      <div class="ctrl-name">💡 Luz</div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn on"   onclick="enviarComando('R3_ON',  this)">ON</button>
+        <button class="ctrl-btn off"  onclick="enviarComando('R3_OFF', this)">OFF</button>
+        <button class="ctrl-btn auto" onclick="enviarComando('R3_AUTO',this)">AUTO</button>
+      </div>
+      <div class="ctrl-status" id="st-r3">Listo</div>
+    </div>
+
+  </div>
+
   <footer class="footer">
-    PetoClaro · Canal ThingSpeak — actualiza cada 60 s
-    · <a href="https://thingspeak.com" target="_blank">ThingSpeak</a>
+    PetoClaro · Canal ThingSpeak &mdash; actualiza cada 60 s
+    &bull; <a href="https://thingspeak.com" target="_blank" rel="noopener">ThingSpeak</a>
+    &bull; datos cada 10 min · v4.8
   </footer>
+
 </main>
 
 <script>
-const API_KEY    = 'ING0ZIN3WLD2C52M';
+// ─── CONFIG ──────────────────────────────────────────────────────
+// ThingSpeak read-only API key + channel ID
+// field1=TempAire field2=HumAire field3=TempHoja field4=DPV
+// field5=TempSuelo20 field6=TempSuelo40 field7=HumSuelo20 field8=HumSuelo40
+const API_KEY    = 'ING0ZIN3WLD2C52M';  // Read API Key
 const CHANNEL_ID = '3411808';
-const RESULTS    = 40;
-const REFRESH_MS = 60000;
+const RESULTS    = 40; // lecturas a pedir
+const REFRESH_MS = 60000; // 60 s
 
+// ─── SENSOR DEFINITIONS ──────────────────────────────────────────
 const SENSORS = [
-  {id:'c-taire',field:1,label:'Temp Aire',unit:'°C',ok:v=>v>=25&&v<29,warn:v=>v>=23&&v<30,color:'#f87171'},
-  {id:'c-haire',field:2,label:'Hum Aire',unit:'%',ok:v=>v>=40&&v<=70,warn:v=>v>=30&&v<=80,color:'#60a5fa'},
-  {id:'c-dpv',field:4,label:'DPV',unit:'kPa',ok:v=>v>=0.7&&v<=1.2,warn:v=>v>=0.5&&v<=1.6,color:'#a78bfa'},
-  {id:'c-thoja',field:3,label:'Temp Hoja',unit:'°C',ok:v=>false,warn:v=>false,color:'#c084fc'},
-  {id:'c-ts20',field:5,label:'T.Suelo 20cm',unit:'°C',ok:v=>v>=20&&v<=22.9,warn:v=>v>=18&&v<26,color:'#fb923c'},
-  {id:'c-ts40',field:6,label:'T.Suelo 40cm',unit:'°C',ok:v=>v>=20&&v<=22.9,warn:v=>v>=18&&v<26,color:'#fbbf24'},
-  {id:'c-hs20',field:7,label:'Hum.Suelo 20cm',unit:'%',ok:v=>v>=50&&v<=80,warn:v=>v>=30&&v<=85,color:'#34d399'},
-  {id:'c-hs40',field:8,label:'Hum.Suelo 40cm',unit:'%',ok:v=>v>=50&&v<=80,warn:v=>v>=30&&v<=85,color:'#22d3ee'},
+  { id:'c-taire', field:1, label:'Temp Aire',    unit:'°C',
+    ok: v=>v>=25&&v<29, warn: v=>v>=23&&v<30,
+    sub: 'DHT22',
+    color: '#f87171' },
+  { id:'c-haire', field:2, label:'Hum Aire',     unit:'%',
+    ok: v=>v>=40&&v<=70, warn: v=>v>=30&&v<=80,
+    sub: 'DHT22',
+    color: '#60a5fa' },
+  { id:'c-dpv',   field:4, label:'DPV',          unit:'kPa',
+    ok: v=>v>=0.7&&v<=1.2, warn: v=>v>=0.5&&v<=1.6,
+    sub: 'calc.',
+    color: '#a78bfa' },
+  { id:'c-thoja', field:3, label:'Temp Hoja',    unit:'°C',
+    ok: v=>false, warn: v=>false, // MLX desactivado
+    sub: 'MLX90614',
+    color: '#c084fc' },
+  { id:'c-ts20',  field:5, label:'T.Suelo 20cm', unit:'°C',
+    ok: v=>v>=20&&v<=22.9, warn: v=>v>=18&&v<26,
+    sub: 'DS18B20',
+    color: '#fb923c' },
+  { id:'c-ts40',  field:6, label:'T.Suelo 40cm', unit:'°C',
+    ok: v=>v>=20&&v<=22.9, warn: v=>v>=18&&v<26,
+    sub: 'DS18B20',
+    color: '#fbbf24' },
+  { id:'c-hs20',  field:7, label:'Hum.Suelo 20cm', unit:'%',
+    ok: v=>v>=50&&v<=80, warn: v=>v>=30&&v<=85,
+    sub: 'FC-28',
+    color: '#34d399' },
+  { id:'c-hs40',  field:8, label:'Hum.Suelo 40cm', unit:'%',
+    ok: v=>v>=50&&v<=80, warn: v=>v>=30&&v<=85,
+    sub: 'FC-28',
+    color: '#22d3ee' },
 ];
 
-let sparkCharts={},refreshTimer=null;
+// ─── STATE ───────────────────────────────────────────────────────
+let lastData = null;
+let sparkCharts = {};
+let refreshTimer = null;
 
-async function fetchData(){
-  try{
-    const url=`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=${RESULTS}`;
-    const res=await fetch(url);
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    const data=await res.json();
-    renderAll(data);
-    clearTimeout(refreshTimer);
-    refreshTimer=setTimeout(fetchData,REFRESH_MS);
-  }catch(e){
-    const bar=document.getElementById('conn-bar');
-    bar.className='conn-bar conn-err';
-    document.getElementById('conn-text').innerHTML=`<b>Error:</b> ${e.message}`;
-    document.getElementById('sys-pill').className='status-pill pill-err';
-    document.getElementById('sys-pill').textContent='Sin conexión';
+// ─── FETCH ───────────────────────────────────────────────────────
+async function fetchData(manual = false) {
+  if (!CHANNEL_ID) {
+    showChannelError();
+    return;
+  }
+  try {
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=${RESULTS}`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    lastData = data;
+    renderAll(data, manual);
+    scheduleRefresh();
+  } catch(e) {
+    showConnError(e.message);
   }
 }
 
-function renderAll(data){
-  const feeds=data.feeds||[];
-  const latest=feeds[feeds.length-1]||{};
-  const ts=latest.created_at?new Date(latest.created_at):null;
-  const bar=document.getElementById('conn-bar');
-  bar.className='conn-bar conn-ok';
-  document.getElementById('conn-text').innerHTML=`<b>Conectado</b> · Canal ${CHANNEL_ID}`;
-  document.getElementById('conn-detail').textContent=ts?`Última lectura: ${fmtDate(ts)} · ${feeds.length} entradas`:'';
-  if(ts)document.getElementById('ts-hdr').textContent=fmtDate(ts);
-  let allOk=true,anyData=false;
-  for(const s of SENSORS){
-    const v=parseFloat(latest[`field${s.field}`]);
-    const val=isNaN(v)?null:v;
-    renderCard(s,val);
-    if(s.id!=='c-thoja'){if(val===null)allOk=false;else anyData=true;}
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(()=>fetchData(), REFRESH_MS);
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────
+function renderAll(data, manual) {
+  const feeds  = data.feeds || [];
+  const latest = feeds[feeds.length - 1] || {};
+  const ts     = latest.created_at ? new Date(latest.created_at) : null;
+
+  // header
+  updateConn(true, feeds.length, ts);
+  if (ts) {
+    document.getElementById('ts-hdr').textContent = fmtDate(ts);
   }
-  const pill=document.getElementById('sys-pill');
-  if(!anyData){pill.className='status-pill pill-off';pill.textContent='Sin datos';}
-  else if(allOk){pill.className='status-pill pill-ok';pill.textContent='Sistema OK';}
-  else{pill.className='status-pill pill-warn';pill.textContent='Revisar';}
+
+  // cards + system status
+  let allOk = true, anyData = false;
+  for (const s of SENSORS) {
+    const raw = parseFloat(latest[`field${s.field}`]);
+    const v   = isNaN(raw) ? null : raw;
+    renderCard(s, v);
+    if (s.id !== 'c-thoja') {  // MLX desactivado, no afecta semáforo
+      if (v === null) allOk = false;
+      else anyData = true;
+    }
+  }
+
+  // system pill
+  const pill = document.getElementById('sys-pill');
+  if (!anyData) {
+    pill.className = 'status-pill pill-off'; pill.textContent = 'Sin datos';
+  } else if (allOk) {
+    pill.className = 'status-pill pill-ok';  pill.textContent = 'Sistema OK';
+  } else {
+    pill.className = 'status-pill pill-warn'; pill.textContent = 'Revisar';
+  }
+
+  // sparklines
   renderSparks(feeds);
+
+  // stats
   renderStats(feeds);
 }
 
-function renderCard(s,v){
-  const el=document.getElementById(s.id);if(!el)return;
-  if(s.id==='c-thoja'){
-    el.querySelector('.card-val').innerHTML=v!==null?`<span class="v-purple">${v.toFixed(1)}<span class="card-unit"> ${s.unit}</span></span>`:`<span class="v-purple">– –</span>`;
-    el.querySelector('.card-sub').textContent='MLX · sin datos (sensor en revisión)';return;
+function renderCard(s, v) {
+  const el = document.getElementById(s.id);
+  if (!el) return;
+
+  // MLX always dim
+  if (s.id === 'c-thoja') {
+    el.querySelector('.card-val').innerHTML = v !== null
+      ? `<span class="v-purple">${v.toFixed(1)}<span class="card-unit"> ${s.unit}</span></span>`
+      : `<span class="v-purple">– –</span>`;
+    el.querySelector('.card-sub').textContent = 'MLX · sin datos (sensor en revisión)';
+    return;
   }
-  let cls,vcls;
-  if(v===null){cls='c-off';vcls='v-off';}
-  else if(s.ok(v)){cls='c-ok';vcls='v-ok';}
-  else if(s.warn(v)){cls='c-warn';vcls='v-warn';}
-  else{cls='c-crit';vcls='v-crit';}
-  el.className=`card ${cls}`;
-  el.querySelector('.card-val').innerHTML=v!==null?`<span class="${vcls}">${fmt(v,s.unit)}</span>`:`<span class="v-off">– –</span>`;
+
+  let cls, vcls;
+  if (v === null)       { cls='c-off'; vcls='v-off'; }
+  else if (s.ok(v))     { cls='c-ok';  vcls='v-ok'; }
+  else if (s.warn(v))   { cls='c-warn';vcls='v-warn'; }
+  else                  { cls='c-crit';vcls='v-crit'; }
+
+  el.className = `card ${cls}`;
+  const disp = v !== null
+    ? `<span class="${vcls}">${fmt(v, s.unit)}</span>`
+    : `<span class="v-off">– –</span>`;
+  el.querySelector('.card-val').innerHTML = disp;
 }
 
-function fmt(v,unit){
-  let s=unit==='%'?Math.round(v).toString():unit==='kPa'?v.toFixed(2):v.toFixed(1);
-  return`${s}<span class="card-unit"> ${unit}</span>`;
+function fmt(v, unit) {
+  let s;
+  if (unit === '%')   s = Math.round(v).toString();
+  else if (unit==='kPa') s = v.toFixed(2);
+  else                s = v.toFixed(1);
+  return `${s}<span class="card-unit"> ${unit}</span>`;
 }
 
-function renderSparks(feeds){
-  const sec=document.getElementById('spark-section');
-  const SS=SENSORS.filter(s=>s.id!=='c-thoja');
-  if(sec.children.length===0){
-    for(const s of SS){
-      const box=document.createElement('div');box.className='spark-box';
-      box.innerHTML=`<div class="spark-title">${s.label} <span style="color:var(--fg3)">(${s.unit})</span></div><div class="spark-row"><div class="spark-num"><div class="spark-big" id="sp-big-${s.field}">–</div><div class="spark-range" id="sp-rng-${s.field}">–</div></div><canvas class="spark-canvas" id="sp-${s.field}"></canvas></div>`;
+// ─── SPARKLINES ──────────────────────────────────────────────────
+function renderSparks(feeds) {
+  const sec = document.getElementById('spark-section');
+
+  const SPARK_SENSORS = SENSORS.filter(s => s.id !== 'c-thoja');
+
+  // build DOM once
+  if (sec.children.length === 0) {
+    for (const s of SPARK_SENSORS) {
+      const box = document.createElement('div');
+      box.className = 'spark-box';
+      box.innerHTML = `
+        <div class="spark-title">${s.label} <span style="color:var(--fg3);font-weight:400">(${s.unit})</span></div>
+        <div class="spark-row">
+          <div class="spark-num">
+            <div class="spark-big" id="sp-big-${s.field}">–</div>
+            <div class="spark-range" id="sp-rng-${s.field}">–</div>
+          </div>
+          <canvas class="spark-canvas" id="sp-${s.field}"></canvas>
+        </div>`;
       sec.appendChild(box);
     }
   }
-  for(const s of SS){
-    const vals=feeds.map(f=>{const v=parseFloat(f[`field${s.field}`]);return isNaN(v)||v===0?null:v;});
-    const labels=feeds.map(f=>{const d=new Date(f.created_at);return`${pad(d.getHours())}:${pad(d.getMinutes())}`;});
-    const lastVal=[...vals].reverse().find(v=>v!==null);
-    const nn=vals.filter(v=>v!==null);
-    const mn=nn.length?Math.min(...nn):null,mx=nn.length?Math.max(...nn):null;
-    const b=document.getElementById(`sp-big-${s.field}`),r=document.getElementById(`sp-rng-${s.field}`);
-    if(b)b.textContent=lastVal!=null?lastVal.toFixed(s.unit==='kPa'?2:1):'–';
-    if(r)r.textContent=mn!=null?`↓${mn.toFixed(1)} ↑${mx.toFixed(1)} ${s.unit}`:'–';
-    const cid=`sp-${s.field}`;
-    if(sparkCharts[cid])sparkCharts[cid].destroy();
-    const ctx=document.getElementById(cid);if(!ctx)continue;
-    sparkCharts[cid]=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:vals,borderColor:s.color,backgroundColor:s.color+'1a',borderWidth:1.5,pointRadius:0,tension:0.35,fill:true,spanGaps:true}]},options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y!==null?`${c.parsed.y} ${s.unit}`:'sin dato'}}},scales:{x:{display:false},y:{display:true,ticks:{maxTicksLimit:4,font:{size:9},color:'#4a5568'},grid:{color:'#1e2d3d'}}}}});
+
+  Chart.defaults.color = getComputedStyle(document.body).getPropertyValue('--fg3').trim() || '#4a5568';
+  Chart.defaults.borderColor = getComputedStyle(document.body).getPropertyValue('--border').trim() || '#1e2d3d';
+
+  for (const s of SPARK_SENSORS) {
+    const vals = feeds.map(f => {
+      const v = parseFloat(f[`field${s.field}`]);
+      return isNaN(v) || v === 0 ? null : v;
+    });
+    const labels = feeds.map(f => {
+      const d = new Date(f.created_at);
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    });
+
+    const lastVal = [...vals].reverse().find(v=>v!==null);
+    const nonNull = vals.filter(v=>v!==null);
+    const mn = nonNull.length ? Math.min(...nonNull) : null;
+    const mx = nonNull.length ? Math.max(...nonNull) : null;
+
+    const bigEl = document.getElementById(`sp-big-${s.field}`);
+    const rngEl = document.getElementById(`sp-rng-${s.field}`);
+    if (bigEl) bigEl.textContent = lastVal != null ? lastVal.toFixed(s.unit==='kPa'?2:1) : '–';
+    if (rngEl) rngEl.textContent = mn!=null ? `↓${mn.toFixed(1)} ↑${mx.toFixed(1)} ${s.unit}` : '–';
+
+    const canvasId = `sp-${s.field}`;
+    if (sparkCharts[canvasId]) { sparkCharts[canvasId].destroy(); }
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) continue;
+
+    sparkCharts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: vals,
+          borderColor: s.color,
+          backgroundColor: s.color + '1a',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.35,
+          fill: true,
+          spanGaps: true,
+        }]
+      },
+      options: {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{
+          callbacks:{ label: ctx => ctx.parsed.y !== null ? `${ctx.parsed.y} ${s.unit}` : 'sin dato' }
+        }},
+        scales: {
+          x:{ display:false },
+          y:{ display:true, ticks:{ maxTicksLimit:4, font:{size:9}, color:'#4a5568' }, grid:{color:'#1e2d3d'} }
+        }
+      }
+    });
   }
 }
 
-function renderStats(feeds){
-  const sec=document.getElementById('stats-section');sec.innerHTML='';
-  const SS=SENSORS.filter(s=>s.id!=='c-thoja');
-  const groups=[{title:'🌡 Temperatura',sensors:SS.filter(s=>s.unit==='°C')},{title:'💧 Humedad & DPV',sensors:SS.filter(s=>s.unit!=='°C')}];
-  for(const g of groups){
-    const card=document.createElement('div');card.className='stat-card';
-    card.innerHTML=`<div class="stat-card-title">${g.title}</div>`;
-    for(const s of g.sensors){
-      const vals=feeds.map(f=>{const v=parseFloat(f[`field${s.field}`]);return isNaN(v)||v===0?null:v;}).filter(v=>v!==null);
-      const lv=vals[vals.length-1],mn=vals.length?Math.min(...vals):null,mx=vals.length?Math.max(...vals):null,avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
-      const vc=lv==null?'sv-warn':s.ok(lv)?'sv-ok':s.warn(lv)?'sv-warn':'sv-crit';
-      card.innerHTML+=`<div class="stat-row"><div class="stat-key">${s.label}</div><div class="stat-val ${vc}">${lv!=null?lv.toFixed(s.unit==='kPa'?2:1)+' '+s.unit:'–'}</div></div><div class="stat-row" style="background:var(--bg3)"><div class="stat-key" style="font-size:.65rem;color:var(--fg3)">min / prom / max</div><div class="stat-val" style="font-size:.68rem;color:var(--fg2)">${mn!=null?`${mn.toFixed(1)} / ${avg.toFixed(1)} / ${mx.toFixed(1)}`:'–'}</div></div>`;
+// ─── STATS TABLE ─────────────────────────────────────────────────
+function renderStats(feeds) {
+  const sec = document.getElementById('stats-section');
+  sec.innerHTML = '';
+
+  const STAT_SENSORS = SENSORS.filter(s => s.id !== 'c-thoja');
+
+  // Group into pairs for a 2-column layout
+  const groups = [
+    { title:'🌡 Temperatura', sensors: STAT_SENSORS.filter(s=>s.unit==='°C') },
+    { title:'💧 Humedad & DPV', sensors: STAT_SENSORS.filter(s=>s.unit!=='°C') },
+  ];
+
+  for (const g of groups) {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = `<div class="stat-card-title">${g.title}</div>`;
+
+    for (const s of g.sensors) {
+      const vals = feeds.map(f=>{
+        const v=parseFloat(f[`field${s.field}`]);
+        return isNaN(v)||v===0?null:v;
+      }).filter(v=>v!==null);
+
+      const lastVal = vals[vals.length-1];
+      const mn = vals.length ? Math.min(...vals) : null;
+      const mx = vals.length ? Math.max(...vals) : null;
+      const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+
+      const vclass = lastVal==null?'sv-warn': s.ok(lastVal)?'sv-ok': s.warn(lastVal)?'sv-warn':'sv-crit';
+
+      card.innerHTML += `
+        <div class="stat-row">
+          <div class="stat-key">${s.label}</div>
+          <div class="stat-val ${vclass}">${lastVal!=null?lastVal.toFixed(s.unit==='kPa'?2:1)+'<span style="font-weight:400;color:var(--fg3)"> '+s.unit+'</span>':'–'}</div>
+        </div>
+        <div class="stat-row" style="background:var(--bg3)">
+          <div class="stat-key" style="font-size:.65rem;color:var(--fg3)">min / prom / max</div>
+          <div class="stat-val" style="font-size:.68rem;color:var(--fg2)">
+            ${mn!=null?`${mn.toFixed(1)} / ${avg.toFixed(1)} / ${mx.toFixed(1)}`:'–'}
+          </div>
+        </div>`;
     }
     sec.appendChild(card);
   }
 }
 
-function pad(n){return String(n).padStart(2,'0')}
-function fmtDate(d){return`${pad(d.getDate())}/${pad(d.getMonth()+1)}  ${pad(d.getHours())}:${pad(d.getMinutes())}`}
+// ─── CONNECTION ───────────────────────────────────────────────────
+function updateConn(ok, count, ts) {
+  const bar  = document.getElementById('conn-bar');
+  const text = document.getElementById('conn-text');
+  const det  = document.getElementById('conn-detail');
+  bar.className = `conn-bar ${ok?'conn-ok':'conn-err'}`;
+  text.innerHTML = ok
+    ? `<b>Conectado</b> · ThingSpeak Canal ${CHANNEL_ID}`
+    : '<b>Error de conexión</b>';
+  det.textContent = ts ? `Última lectura: ${fmtDate(ts)} · ${count} entradas` : '';
+}
 
+function showConnError(msg) {
+  const bar  = document.getElementById('conn-bar');
+  const text = document.getElementById('conn-text');
+  bar.className = 'conn-bar conn-err';
+  text.innerHTML = `<b>Error de conexión:</b> ${msg}`;
+  document.getElementById('sys-pill').className = 'status-pill pill-err';
+  document.getElementById('sys-pill').textContent = 'Sin conexión';
+}
+
+function showChannelError() {
+  const bar  = document.getElementById('conn-bar');
+  const text = document.getElementById('conn-text');
+  bar.className = 'conn-bar conn-err';
+  text.innerHTML = `
+    <b>⚠ Falta configurar Channel ID</b> —
+    Abrí el archivo <code>petoclaro-dashboard.html</code>,
+    buscá la línea <code>const CHANNEL_ID = '';</code>
+    y reemplazá con tu número de canal ThingSpeak.`;
+  document.getElementById('sys-pill').className = 'status-pill pill-err';
+  document.getElementById('sys-pill').textContent = 'Config incompleta';
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function fmtDate(d) {
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}  ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// ─── CONTROL REMOTO (TalkBack) ───────────────────────────────────
+const TALKBACK_ID  = '57896';
+const TALKBACK_KEY = '7DGDYNM6DPXSGM7C';
+
+async function enviarComando(cmd, btn) {
+  // Determinar qué relay y su div de estado
+  const relay = cmd.startsWith('R1') ? 'r1' : 'r3';
+  const stEl  = document.getElementById('st-' + relay);
+
+  // Bloquear botones del card temporalmente
+  const btns = btn.closest('.ctrl-card').querySelectorAll('.ctrl-btn');
+  btns.forEach(b => b.disabled = true);
+  stEl.className = 'ctrl-status';
+  stEl.textContent = '⏳ Enviando…';
+
+  const url  = `https://api.thingspeak.com/talkbacks/${TALKBACK_ID}/commands.json`;
+  const body = `api_key=${TALKBACK_KEY}&command_string=${cmd}`;
+
+  try {
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    if (res.ok) {
+      stEl.className   = 'ctrl-status ok';
+      stEl.textContent = `✓ ${cmd} en cola · Arduino ejecuta en ~30 s`;
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch(e) {
+    stEl.className   = 'ctrl-status err';
+    stEl.textContent = `✗ Error: ${e.message}`;
+  } finally {
+    btns.forEach(b => b.disabled = false);
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
 fetchData();
 </script>
-</body>
-</html>
