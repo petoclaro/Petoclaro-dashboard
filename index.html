@@ -38,7 +38,7 @@
     <h2 style="margin:0 0 8px;font-size:16px">Control remoto</h2>
     <div class="ctl"><div><b>Extractor</b><span class="hint">relé 1</span></div><div class="btns"><button class="on" onclick="cmd(['R1_ON'])">Encender</button><button class="off" onclick="cmd(['R1_OFF'])">Apagar</button><button onclick="cmd(['R1_AUTO'])">Automático</button></div></div>
     <div class="ctl"><div><b>Luz</b><span class="hint">relé 3</span></div><div class="btns"><button class="on" onclick="cmd(['R3_ON'])">Encender</button><button class="off" onclick="cmd(['R3_OFF'])">Apagar</button><button onclick="cmd(['R3_AUTO'])">Automático</button></div></div>
-    <div class="sched"><b style="margin-right:auto">Horario de la luz</b>
+    <div class="sched"><div style="margin-right:auto"><b>Horario de la luz</b><div class="hint" id="last">Sin horario guardado en este navegador</div></div>
       <label>Enciende<input type="time" id="hon" value="06:00"></label>
       <label>Apaga<input type="time" id="hoff" value="00:00"></label>
       <button class="save" onclick="saveSched()">Guardar horario</button></div>
@@ -82,17 +82,23 @@ function render(){
   chart = new Chart(document.getElementById("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#e6efe8"}}}}});
 }
 async function cmd(commands){
-  const m = document.getElementById("msg"); m.textContent = "Enviando…";
+  let ok=false; const m = document.getElementById("msg"); m.textContent = "Enviando…";
   try{
     const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commands})});
-    const j = await r.json();
+    const j = await r.json(); ok = !!j.ok;
     m.textContent = j.ok ? commands.join(", ")+" en cola · el Arduino lo aplica en ~30 s" : "Error: "+(j.error||r.status);
   }catch(e){ m.textContent = "Error de conexión con el panel"; }
+  return ok;
 }
-function saveSched(){
-  const f = id => document.getElementById(id).value.replace(":","_");
-  cmd(["R3_HON_"+f("hon"),"R3_HOFF_"+f("hoff"),"R3_AUTO"]);
+function showSched(h){ document.getElementById("last").textContent = "Último horario configurado: "+h.on+" a "+h.off; }
+async function saveSched(){
+  const on = document.getElementById("hon").value, off = document.getElementById("hoff").value;
+  if (await cmd(["R3_HON_"+on.replace(":","_"),"R3_HOFF_"+off.replace(":","_"),"R3_AUTO"])){
+    localStorage.setItem("pc-horario", JSON.stringify({on,off})); showSched({on,off});
+  }
 }
+try{ const h = JSON.parse(localStorage.getItem("pc-horario")||"null");
+  if (h && h.on && h.off){ document.getElementById("hon").value=h.on; document.getElementById("hoff").value=h.off; showSched(h); } }catch(e){}
 function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
 async function load(){
   try{
