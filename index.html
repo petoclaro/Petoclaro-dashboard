@@ -3,55 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PetoClaro — Panel del cultivo</title>
+<title>PetoClaro — Inteligencia del cultivo indoor</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#09090e;--card:#12121a;--line:#24243a;--txt:#eef0f8;--mut:#8b8ca8;--pri:#9b8cff;--live:#34d399;--bad:#f87171}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#16162a,var(--bg) 60%);background-attachment:fixed;color:var(--txt);font-family:Inter,system-ui,sans-serif}
-header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:#09090ed9;backdrop-filter:blur(8px)}
-.logo b{display:block;color:var(--pri);font-size:18px;letter-spacing:-.5px}.logo small{font:10px ui-monospace,monospace;letter-spacing:.3em;color:var(--mut)}
+:root{--bg:#020805;--card:#061009;--line:#183323;--txt:#edf7ee;--mut:#7d9b85;--pri:#9ee841;--cyan:#48d6dc;--warn:#ffc43d;--live:#49df79;--bad:#f1655b}
+*{box-sizing:border-box}body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;background-attachment:fixed;color:var(--txt);font-family:system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:#020805eb;backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:10px}.logo:before{content:"⌁";display:grid;place-items:center;width:38px;height:38px;border:1px solid #9ee84166;border-radius:6px;color:var(--pri);font-size:24px}.logo b{display:block;color:var(--txt);font-size:16px;text-transform:uppercase}.logo small{display:block;font:9px ui-monospace,monospace;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
 .right{display:flex;gap:10px;align-items:center;font:12px ui-monospace,monospace;color:var(--mut)}
 .pill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--txt)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live)}.dot.off{background:var(--bad);box-shadow:none}
-button{font:inherit;cursor:pointer}.r{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:5px 10px}
-main{max-width:1280px;margin:auto;padding:20px;display:grid;gap:16px;grid-template-columns:1fr 340px}
+button{font:inherit;cursor:pointer}.r,.history{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:7px 10px;text-decoration:none}.history{color:var(--pri);font:10px ui-monospace,monospace;text-transform:uppercase}
+main{max-width:1500px;margin:auto;padding:20px;display:grid;gap:16px;grid-template-columns:1fr 360px}
 @media(max-width:900px){main{grid-template-columns:1fr}}
 .alert{grid-column:1/-1;border:1px solid #f8717166;background:#f871710f;border-radius:12px;padding:12px 16px;font-size:14px}.alert b{color:var(--bad)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.tile{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 0;color:inherit;text-align:center;overflow:hidden}
+.tile{position:relative;min-height:126px;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:12px 12px 0;color:inherit;text-align:left;overflow:hidden}
 .tile.off{opacity:.55}.tile .eye{position:absolute;right:8px;top:6px;font-size:12px}
 .tile .n{font:11px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut)}
 .tile .v{font:600 20px ui-monospace,monospace}.tile .v span{font-size:12px;color:var(--mut)}
 .tile .mm{font:11px ui-monospace,monospace}.tile svg{display:block;width:100%;height:32px;margin-top:4px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:16px;margin-top:16px}
 .foot{text-align:center;font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
 aside h3{font:12px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut);margin:0 0 10px;font-weight:400}
 aside h3 span{border:1px solid var(--line);border-radius:99px;padding:2px 8px;margin-left:6px}
-.dev{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px}
-.dev.lit{border-color:#9b8cff80;background:#9b8cff12}.dev .ic{font-size:30px}.dev b{display:block;margin-top:6px}
+.dev{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:16px;text-align:left;margin-bottom:12px}
+.dev.lit{border-color:#9ee84180;background:#9ee8410a}.dev .ic{font-size:26px;color:var(--pri)}.dev b{display:block;margin-top:6px}
 .dev .st{font:12px ui-monospace,monospace;color:var(--mut);margin-bottom:12px}
 .seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px}
 .seg button{flex:1;background:none;border:0;border-radius:6px;padding:7px;color:var(--mut);font:12px ui-monospace,monospace}
-.seg button.act{background:var(--pri);color:#0d0d18}.seg button.act.on{background:var(--live)}.seg button.act.off{background:var(--bad)}
+.seg button.act{background:var(--pri);color:var(--bg)}.seg button.act.on{background:var(--live)}.seg button.act.off{background:var(--bad)}
 .seg button:disabled{opacity:.5}
 .sch{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;text-align:left}
 .sch .row{display:flex;gap:8px}.sch label{flex:1;font-size:12px;color:var(--mut)}
 .sch input{display:block;width:100%;margin-top:4px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px;color-scheme:dark}
 .hint{font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
-.save{width:100%;margin-top:8px;background:var(--pri);color:#0d0d18;border:0;border-radius:8px;padding:9px;font-weight:600}
+.save{width:100%;margin-top:8px;background:var(--pri);color:var(--bg);border:0;border-radius:6px;padding:9px;font-weight:700}
 #msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;display:none}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><b>PETO</b><small>CLARO</small></div>
-  <div class="right"><span id="ts"></span><span class="pill"><span class="dot" id="dot"></span><span id="live">Live</span></span><button class="r" onclick="load()">↻</button></div>
+  <div class="logo"><span><b>PetoClaro</b><small>Indoor grow intelligence / 01</small></span></div>
+  <div class="right"><span id="ts"></span><a class="history" href="https://pixel-perfect-showcase-5714.lovable.app" target="_blank" rel="noopener">Historial e informes</a><span class="pill"><span class="dot" id="dot"></span><span id="live">En línea</span></span><button class="r" onclick="load()" aria-label="Actualizar">↻</button></div>
 </header>
 <main>
   <div class="alert" id="alert" style="display:none"><b>Sin señal:</b> el Arduino no envía datos hace más de 25 minutos. Revisá la conexión.</div>
   <div>
     <div class="tiles" id="tiles"></div>
-    <div class="panel"><div style="height:420px"><canvas id="chart"></canvas></div><div class="foot" id="foot"></div></div>
+    <div class="panel"><div class="seg" style="max-width:280px;margin-left:auto;margin-bottom:12px"><button id="p24h" class="act" onclick="loadHistory('24h')">24 H</button><button id="p7d" onclick="loadHistory('7d')">7 DÍAS</button><button id="p30d" onclick="loadHistory('30d')">30 DÍAS</button></div><div style="height:420px"><canvas id="chart"></canvas></div><div class="foot" id="foot"></div></div>
   </div>
   <aside>
     <h3>DISPOSITIVOS <span id="cnt">0 ACTIVOS</span></h3>
@@ -69,18 +69,19 @@ aside h3 span{border:1px solid var(--line);border-radius:99px;padding:2px 8px;ma
 <div id="msg"></div>
 <script>
 // Clave de SOLO LECTURA (segura de publicar). La clave de TalkBack queda en el servidor del panel.
-const API = "https://pixel-perfect-showcase-5714.lovable.app/api/public/command";
+const BASE = "https://pixel-perfect-showcase-5714.lovable.app";
+const API = BASE + "/api/public/command";
 const CHANNEL = 3411808, READ_KEY = "ING0ZIN3WLD2C52M";
 const S = [
-  {f:"field1",l:"TEMP",u:"°C",c:"#7dd3fc",d:1},
-  {f:"field2",l:"HUM",u:"%",c:"#a78bfa",d:0},
-  {f:"field4",l:"DPV",u:"kPa",c:"#5eead4",d:2},
-  {f:"field5",l:"T.SUELO 20",u:"°C",c:"#fbbf24",d:1},
-  {f:"field6",l:"T.SUELO 40",u:"°C",c:"#fde047",d:1},
-  {f:"field7",l:"H.SUELO 20",u:"%",c:"#f472b6",d:0},
-  {f:"field8",l:"H.SUELO 40",u:"%",c:"#67e8f9",d:0},
+  {f:"field1",l:"TEMP AIRE",u:"°C",c:"#48d6dc",d:1},
+  {f:"field2",l:"HUM AMB",u:"%",c:"#9ee841",d:0},
+  {f:"field4",l:"DPV",u:"kPa",c:"#ffc43d",d:2},
+  {f:"field5",l:"T.SUELO 20",u:"°C",c:"#ed7d46",d:1},
+  {f:"field6",l:"T.SUELO 40",u:"°C",c:"#bf72d8",d:1},
+  {f:"field7",l:"H.SUELO 20",u:"%",c:"#72a7ef",d:0},
+  {f:"field8",l:"H.SUELO 40",u:"%",c:"#48c6a2",d:0},
 ];
-let feeds=[], sel=new Set(["field1","field2","field4"]), chart, busy=false;
+let feeds=[], sel=new Set(["field1","field2","field4"]), chart, busy=false, period="24h";
 let modes={R1:"AUTO",R3:"AUTO"}, saved=null;
 const num=x=>{const n=parseFloat(x);return Number.isFinite(n)?n:null;};
 const $=id=>document.getElementById(id);
@@ -100,12 +101,12 @@ function render(){
       <div class="n">${s.l}</div><div class="v">${v==null?"—":v.toFixed(s.d)}<span>${s.u}</span></div>${mm}${spark(ser,s.c)}</button>`;
   }).join("");
   const act=S.filter(s=>sel.has(s.f)), units=[...new Set(act.map(s=>s.u))];
-  const scales={x:{ticks:{color:"#8b8ca8",maxTicksLimit:8},grid:{color:"#1c1c2c"}}};
-  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",display:i<2,ticks:{color:"#8b8ca8"},grid:{color:i?"transparent":"#1c1c2c"}});
+  const scales={x:{ticks:{color:"#7d9b85",maxTicksLimit:8},grid:{color:"#183323"}}};
+  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",display:i<2,ticks:{color:"#7d9b85"},grid:{color:i?"transparent":"#183323"}});
   const data={labels:feeds.map(f=>new Date(f.created_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})),
     datasets:act.map(s=>({label:`${s.l} (${s.u})`,data:feeds.map(f=>num(f[s.f])),borderColor:s.c,backgroundColor:s.c,yAxisID:s.u,pointRadius:0,borderWidth:1.6,tension:.3,spanGaps:true}))};
   if(chart) chart.destroy();
-  chart=new Chart($("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#eef0f8",boxWidth:10}}}}});
+  chart=new Chart($("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#edf7ee",boxWidth:10}}}}});
   $("foot").textContent=feeds.length+" muestras · escalas independientes · tocá los sensores para superponer";
 }
 function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
@@ -152,18 +153,30 @@ try{ const m=JSON.parse(localStorage.getItem("pc-modos")||"null"); if(m) modes=m
   if(h&&h.on&&h.off){ saved=h; $("hon").value=h.on; $("hoff").value=h.off; $("last").textContent="Último horario: "+h.on+" a "+h.off+" · tarda ~90 s en aplicarse"; } }catch(e){}
 renderDevices(); photo();
 
+async function loadHistory(p){
+  period=p; ["24h","7d","30d"].forEach(x=>$("p"+x).classList.toggle("act",x===p));
+  try{
+    const r=await fetch(BASE+"/api/public/history?range="+p), j=await r.json();
+    if(!j.ok) throw new Error(j.error||r.status);
+    feeds=(j.readings||[]).map(x=>({created_at:x.recordedAt,field1:x.airTemperature,field2:x.airHumidity,field3:x.auxiliaryValue,field4:x.vpd,field5:x.soilTemperature20,field6:x.soilTemperature40,field7:x.soilHumidity20,field8:x.soilHumidity40}));
+    render();
+  }catch(e){
+    if(p!=="24h") toast("Publicá el panel para habilitar este período histórico");
+    await load();
+  }
+}
 async function load(){
   try{
     const r=await fetch(`https://api.thingspeak.com/channels/${CHANNEL}/feeds.json?api_key=${READ_KEY}&results=144`);
     feeds=(await r.json()).feeds||[];
     const l=feeds[feeds.length-1], ts=l?new Date(l.created_at):null, stale=!ts||Date.now()-ts>25*60000;
     $("ts").textContent=ts?ts.toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"sin datos";
-    $("dot").classList.toggle("off",stale); $("live").textContent=stale?"Sin señal":"Live";
+    $("dot").classList.toggle("off",stale); $("live").textContent=stale?"Sin señal":"En línea";
     $("alert").style.display=stale&&l?"block":"none";
     render();
   }catch(e){ $("ts").textContent="error al leer ThingSpeak"; }
 }
-load(); setInterval(load,60000);
+loadHistory("24h"); setInterval(()=>loadHistory(period),60000);
 </script>
 </body>
 </html>
