@@ -3,68 +3,111 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PetoClaro — Inteligencia del cultivo indoor</title>
+<title>PetoClaro — Mi cultivo</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#020805;--card:#061009;--line:#183323;--txt:#edf7ee;--mut:#7d9b85;--pri:#9ee841;--cyan:#48d6dc;--warn:#ffc43d;--live:#49df79;--bad:#f1655b}
-*{box-sizing:border-box}body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;background-attachment:fixed;color:var(--txt);font-family:system-ui,sans-serif}
-header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:#020805eb;backdrop-filter:blur(12px)}
-.logo{display:flex;align-items:center;gap:10px}.logo:before{content:"⌁";display:grid;place-items:center;width:38px;height:38px;border:1px solid #9ee84166;border-radius:6px;color:var(--pri);font-size:24px}.logo b{display:block;color:var(--txt);font-size:16px;text-transform:uppercase}.logo small{display:block;font:9px ui-monospace,monospace;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
-.right{display:flex;gap:10px;align-items:center;font:12px ui-monospace,monospace;color:var(--mut)}
-.pill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--txt)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live)}.dot.off{background:var(--bad);box-shadow:none}
-button{font:inherit;cursor:pointer}.r,.history{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:7px 10px;text-decoration:none}.history{color:var(--pri);font:10px ui-monospace,monospace;text-transform:uppercase}
-main{max-width:1500px;margin:auto;padding:20px;display:grid;gap:16px;grid-template-columns:1fr 360px}
-@media(max-width:900px){main{grid-template-columns:1fr}}
-.alert{grid-column:1/-1;border:1px solid #f8717166;background:#f871710f;border-radius:12px;padding:12px 16px;font-size:14px}.alert b{color:var(--bad)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.tile{position:relative;min-height:126px;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:12px 12px 0;color:inherit;text-align:left;overflow:hidden}
-.tile.off{opacity:.55}.tile .eye{position:absolute;right:8px;top:6px;font-size:12px}
-.tile .n{font:11px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut)}
-.tile .v{font:600 20px ui-monospace,monospace}.tile .v span{font-size:12px;color:var(--mut)}
-.tile .mm{font:11px ui-monospace,monospace}.tile svg{display:block;width:100%;height:32px;margin-top:4px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:16px;margin-top:16px}
-.foot{text-align:center;font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
-aside h3{font:12px ui-monospace,monospace;letter-spacing:.08em;color:var(--mut);margin:0 0 10px;font-weight:400}
-aside h3 span{border:1px solid var(--line);border-radius:99px;padding:2px 8px;margin-left:6px}
-.dev{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:16px;text-align:left;margin-bottom:12px}
-.dev.lit{border-color:#9ee84180;background:#9ee8410a}.dev .ic{font-size:26px;color:var(--pri)}.dev b{display:block;margin-top:6px}
-.dev .st{font:12px ui-monospace,monospace;color:var(--mut);margin-bottom:12px}
-.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px}
-.seg button{flex:1;background:none;border:0;border-radius:6px;padding:7px;color:var(--mut);font:12px ui-monospace,monospace}
-.seg button.act{background:var(--pri);color:var(--bg)}.seg button.act.on{background:var(--live)}.seg button.act.off{background:var(--bad)}
+:root{--bg:#f3f6f1;--card:#fff;--line:#dfe6dc;--txt:#1b2a21;--mut:#68786d;--pri:#1f7a4d;--pri2:#e4f3ea;--warn:#c77d0a;--bad:#c2383f;--ok:#1f9d5c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;cursor:pointer}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.top{max-width:1100px;margin:auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:20px;font-weight:800;color:var(--pri)}.brand small{display:block;font-size:12px;font-weight:500;color:var(--mut)}
+.status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut)}
+.badge{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;background:var(--pri2);color:var(--pri);font-weight:700;font-size:14px}
+.badge i{width:9px;height:9px;border-radius:50%;background:var(--ok)}.badge.off{background:#fbe7e8;color:var(--bad)}.badge.off i{background:var(--bad)}
+.refresh{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 12px}
+nav{max-width:1100px;margin:auto;display:flex;gap:4px;padding:0 12px}
+nav button{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:12px 6px;font-weight:700;color:var(--mut);font-size:16px}
+nav button.act{color:var(--pri);border-color:var(--pri)}
+main{max-width:1100px;margin:auto;padding:18px 16px 60px}
+section{display:none}section.act{display:block}
+h2{font-size:22px;margin:4px 0 4px}.sub{color:var(--mut);margin:0 0 16px;font-size:15px}
+h3{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
+.alert{background:#fbe7e8;border:1px solid #efb7ba;color:#8c242a;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.big .lbl{font-weight:700;font-size:15px}.big .val{font-size:40px;font-weight:800;line-height:1.1;margin:6px 0 2px}.big .val span{font-size:18px;color:var(--mut);font-weight:600;margin-left:2px}
+.big .mm{font-size:13px;color:var(--mut)}.big svg{width:100%;height:36px;margin-top:8px;display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;padding:8px 14px;border-radius:9px;font-weight:700;color:var(--mut)}
+.seg button.act{background:var(--pri);color:#fff}.seg button.on.act{background:var(--ok)}.seg button.offb.act{background:var(--bad)}
 .seg button:disabled{opacity:.5}
-.sch{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;text-align:left}
-.sch .row{display:flex;gap:8px}.sch label{flex:1;font-size:12px;color:var(--mut)}
-.sch input{display:block;width:100%;margin-top:4px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px;color-scheme:dark}
-.hint{font:11px ui-monospace,monospace;color:var(--mut);margin-top:8px}
-.save{width:100%;margin-top:8px;background:var(--pri);color:var(--bg);border:0;border-radius:6px;padding:9px;font-weight:700}
-#msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;display:none}
+.dev .seg{display:flex;width:100%}.dev .seg button{flex:1;padding:10px 4px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:99px;padding:6px 12px;font-size:14px;font-weight:600;color:var(--mut);display:inline-flex;gap:6px;align-items:center}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}.chip.act{border-color:var(--c);color:var(--txt)}
+.btn{border:0;background:var(--pri);color:#fff;border-radius:12px;padding:11px 18px;font-weight:700}
+.btn.ghost{background:var(--card);color:var(--pri);border:1px solid var(--pri)}.btn:disabled{opacity:.5}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:right;padding:9px 6px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-size:13px;font-weight:600}
+.dev{display:flex;flex-direction:column;gap:12px}.dev h4{margin:0;font-size:19px}.dev .st{color:var(--mut);font-size:14px;margin-top:-6px}
+.sch{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:10px}
+.sch .times{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sch label{font-size:14px;font-weight:600;min-width:0}
+.sch input{display:block;width:100%;min-width:0;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--card);color:var(--txt)}
+.hint{font-size:13px;color:var(--mut)}
+#msg{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--txt);color:#fff;border-radius:12px;padding:12px 18px;font-size:15px;display:none;max-width:90vw;z-index:20}
+.chartbox{height:380px;position:relative}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><span><b>PetoClaro</b><small>Indoor grow intelligence / 01</small></span></div>
-  <div class="right"><span id="ts"></span><a class="history" href="https://pixel-perfect-showcase-5714.lovable.app" target="_blank" rel="noopener">Historial e informes</a><span class="pill"><span class="dot" id="dot"></span><span id="live">En línea</span></span><button class="r" onclick="load()" aria-label="Actualizar">↻</button></div>
+  <div class="top">
+    <div class="brand">PetoClaro<small>Monitor de mi cultivo indoor</small></div>
+    <div class="status"><span id="ts">Cargando…</span><span class="badge" id="badge"><i></i><span id="live">En línea</span></span><button class="refresh" onclick="load()" aria-label="Actualizar">↻ Actualizar</button></div>
+  </div>
+  <nav>
+    <button class="act" data-tab="estado">🌡️ Estado</button>
+    <button data-tab="historial">📈 Historial</button>
+    <button data-tab="control">⚙️ Control</button>
+  </nav>
 </header>
 <main>
-  <div class="alert" id="alert" style="display:none"><b>Sin señal:</b> el Arduino no envía datos hace más de 25 minutos. Revisá la conexión.</div>
-  <div>
-    <div class="tiles" id="tiles"></div>
-    <div class="panel"><div class="seg" style="max-width:280px;margin-left:auto;margin-bottom:12px"><button id="p24h" class="act" onclick="loadHistory('24h')">24 H</button><button id="p7d" onclick="loadHistory('7d')">7 DÍAS</button><button id="p30d" onclick="loadHistory('30d')">30 DÍAS</button></div><div style="height:420px"><canvas id="chart"></canvas></div><div class="foot" id="foot"></div></div>
-  </div>
-  <aside>
-    <h3>DISPOSITIVOS <span id="cnt">0 ACTIVOS</span></h3>
-    <div class="dev" id="d-R1"><div class="ic">✳</div><b>Extractor</b><div class="st" id="st-R1"></div><div class="seg" id="seg-R1"></div></div>
-    <div class="dev" id="d-R3"><div class="ic">☀</div><b>Iluminación</b><div class="st" id="st-R3"></div><div class="seg" id="seg-R3"></div>
-      <div class="sch">
-        <div class="row"><label>Enciende<input type="time" id="hon" value="06:00" oninput="photo()"></label><label>Apaga<input type="time" id="hoff" value="00:00" oninput="photo()"></label></div>
-        <div class="hint" id="photo"></div>
-        <button class="save" id="saveBtn" onclick="saveSched()">Guardar horario</button>
-        <div class="hint" id="last">Sin horario guardado · tarda ~90 s en aplicarse</div>
+  <div class="alert" id="alert"><b>Sin señal:</b> la placa no envía datos hace más de 25 minutos. Revisá la conexión a internet y la alimentación.</div>
+
+  <section id="estado" class="act">
+    <h2>¿Cómo está mi cultivo ahora?</h2>
+    <p class="sub">Última lectura de cada sensor y su recorrido de las últimas 24 horas.</p>
+    <h3>Aire de la sala</h3>
+    <div class="grid" id="g-aire"></div>
+    <h3>Suelo</h3>
+    <div class="grid" id="g-suelo"></div>
+  </section>
+
+  <section id="historial">
+    <h2>Historial y comparación</h2>
+    <p class="sub">Elegí el período y qué sensores querés ver juntos en el gráfico.</p>
+    <div class="row" style="margin-bottom:12px">
+      <div class="seg"><button id="p24h" class="act" onclick="loadHistory('24h')">24 horas</button><button id="p7d" onclick="loadHistory('7d')">7 días</button><button id="p30d" onclick="loadHistory('30d')">30 días</button></div>
+      <button class="btn ghost" onclick="csv()">⬇ Descargar CSV</button>
+    </div>
+    <div class="row" id="chips" style="margin-bottom:12px"></div>
+    <div class="card"><div class="chartbox"><canvas id="chart"></canvas></div><div class="hint" id="foot" style="margin-top:8px"></div></div>
+    <h3>Resumen del período</h3>
+    <div class="card" style="overflow-x:auto"><table id="stats"></table></div>
+  </section>
+
+  <section id="control">
+    <h2>Control de equipos</h2>
+    <p class="sub">Los cambios tardan hasta 90 segundos en llegar a la placa.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+      <div class="card dev">
+        <h4>🌀 Extractor</h4><div class="st" id="st-R1"></div>
+        <div class="seg" id="seg-R1"></div>
+        <div class="hint">Automático: la placa decide según la temperatura.</div>
+      </div>
+      <div class="card dev">
+        <h4>💡 Iluminación</h4><div class="st" id="st-R3"></div>
+        <div class="seg" id="seg-R3"></div>
+        <div class="sch">
+          <b>Horario de la luz</b>
+          <div class="times"><label>Enciende<input type="time" id="hon" value="06:00" oninput="photo()"></label><label>Apaga<input type="time" id="hoff" value="00:00" oninput="photo()"></label></div>
+          <div class="hint" id="photo"></div>
+          <button class="btn" id="saveBtn" onclick="saveSched()">Guardar horario</button>
+          <div class="hint" id="last">Todavía no guardaste ningún horario.</div>
+        </div>
       </div>
     </div>
-  </aside>
+  </section>
 </main>
 <div id="msg"></div>
 <script>
@@ -73,54 +116,97 @@ const BASE = "https://pixel-perfect-showcase-5714.lovable.app";
 const API = BASE + "/api/public/command";
 const CHANNEL = 3411808, READ_KEY = "ING0ZIN3WLD2C52M";
 const S = [
-  {f:"field1",l:"TEMP AIRE",u:"°C",c:"#48d6dc",d:1},
-  {f:"field2",l:"HUM AMB",u:"%",c:"#9ee841",d:0},
-  {f:"field4",l:"DPV",u:"kPa",c:"#ffc43d",d:2},
-  {f:"field5",l:"T.SUELO 20",u:"°C",c:"#ed7d46",d:1},
-  {f:"field6",l:"T.SUELO 40",u:"°C",c:"#bf72d8",d:1},
-  {f:"field7",l:"H.SUELO 20",u:"%",c:"#72a7ef",d:0},
-  {f:"field8",l:"H.SUELO 40",u:"%",c:"#48c6a2",d:0},
+  {f:"field1",l:"Temperatura del aire",g:"aire",u:"°C",c:"#d9534f",d:1,lim:[-10,60]},
+  {f:"field2",l:"Humedad del aire",g:"aire",u:"%",c:"#2f80c9",d:0,lim:[1,100]},
+  {f:"field5",l:"Temp. suelo 20 cm",g:"suelo",u:"°C",c:"#e08a1e",d:1,lim:[-5,50]},
+  {f:"field6",l:"Temp. suelo 40 cm",g:"suelo",u:"°C",c:"#8e5bb5",d:1,lim:[-5,50]},
+  {f:"field7",l:"Humedad suelo 20 cm",g:"suelo",u:"%",c:"#1f9d8f",d:0,lim:[1,100]},
+  {f:"field8",l:"Humedad suelo 40 cm",g:"suelo",u:"%",c:"#5b8c2a",d:0,lim:[1,100]},
 ];
-let feeds=[], sel=new Set(["field1","field2","field4"]), chart, busy=false, period="24h";
+let feeds=[], day=[], sel=new Set(["field1","field2","field7"]), chart, busy=false, period="24h";
 let modes={R1:"AUTO",R3:"AUTO"}, saved=null;
-const num=x=>{const n=parseFloat(x);return Number.isFinite(n)?n:null;};
 const $=id=>document.getElementById(id);
+const num=x=>{const n=parseFloat(x);return Number.isFinite(n)?n:null;};
 
+// Valores de error (-127, 0 inválido, fuera de rango) se reemplazan por la última lectura buena.
+function cleanFeeds(rows){
+  const prev={};
+  return rows.map(row=>{
+    const c={...row};
+    S.forEach(s=>{
+      const v=num(row[s.f]);
+      if(v!==null&&v!==-127&&v>=s.lim[0]&&v<=s.lim[1]) prev[s.f]=v; else c[s.f]=prev[s.f]??null;
+    });
+    return c;
+  });
+}
+function toast(t){const m=$("msg");m.textContent=t;m.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>m.style.display="none",4500);}
+
+/* Pestañas */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("act",x===b));
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("act",s.id===b.dataset.tab));
+  if(b.dataset.tab==="historial"&&chart) chart.resize();
+  scrollTo({top:0});
+});
+
+/* Estado */
 function spark(vals,c){
-  const v=vals.filter(x=>x!=null); if(v.length<2) return "<svg></svg>";
+  const v=vals.filter(x=>x!=null); if(v.length<2) return "";
   const mn=Math.min(...v),mx=Math.max(...v),r=mx-mn||1;
-  const p=v.map((x,i)=>`${i/(v.length-1)*100},${30-(x-mn)/r*26}`).join(" ");
-  return `<svg viewBox="0 0 100 32" preserveAspectRatio="none"><polyline points="${p}" fill="none" stroke="${c}" stroke-width="1.2" vector-effect="non-scaling-stroke" opacity=".8"/></svg>`;
+  const p=v.map((x,i)=>`${i/(v.length-1)*100},${32-(x-mn)/r*28}`).join(" ");
+  return `<svg viewBox="0 0 100 36" preserveAspectRatio="none"><polyline points="${p}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
 }
-function render(){
-  const last=feeds[feeds.length-1]||{};
-  $("tiles").innerHTML=S.map(s=>{
-    const ser=feeds.map(f=>num(f[s.f])), vals=ser.filter(x=>x!=null), v=num(last[s.f]), on=sel.has(s.f);
-    const mm=vals.length?`<div class="mm" style="color:${s.c}">↓${Math.min(...vals).toFixed(s.d)} ↑${Math.max(...vals).toFixed(s.d)}</div>`:"";
-    return `<button class="tile ${on?"":"off"}" onclick="tog('${s.f}')"><span class="eye" style="color:${on?s.c:"#8b8ca8"}">${on?"◉":"○"}</span>
-      <div class="n">${s.l}</div><div class="v">${v==null?"—":v.toFixed(s.d)}<span>${s.u}</span></div>${mm}${spark(ser,s.c)}</button>`;
-  }).join("");
-  const act=S.filter(s=>sel.has(s.f)), units=[...new Set(act.map(s=>s.u))];
-  const scales={x:{ticks:{color:"#7d9b85",maxTicksLimit:8},grid:{color:"#183323"}}};
-  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",display:i<2,ticks:{color:"#7d9b85"},grid:{color:i?"transparent":"#183323"}});
-  const data={labels:feeds.map(f=>new Date(f.created_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})),
-    datasets:act.map(s=>({label:`${s.l} (${s.u})`,data:feeds.map(f=>num(f[s.f])),borderColor:s.c,backgroundColor:s.c,yAxisID:s.u,pointRadius:0,borderWidth:1.6,tension:.3,spanGaps:true}))};
-  if(chart) chart.destroy();
-  chart=new Chart($("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{labels:{color:"#edf7ee",boxWidth:10}}}}});
-  $("foot").textContent=feeds.length+" muestras · escalas independientes · tocá los sensores para superponer";
+function renderState(){
+  const last=day[day.length-1]||{};
+  ["aire","suelo"].forEach(g=>{
+    $("g-"+g).innerHTML=S.filter(s=>s.g===g).map(s=>{
+      const ser=day.map(f=>num(f[s.f])), vals=ser.filter(x=>x!=null), v=num(last[s.f]);
+      const mm=vals.length?`Mín ${Math.min(...vals).toFixed(s.d)} · Máx ${Math.max(...vals).toFixed(s.d)} ${s.u} (24 h)`:"Sin datos";
+      return `<div class="card big"><div class="lbl" style="color:${s.c}">${s.l}</div><div class="val">${v==null?"—":v.toFixed(s.d)}<span>${s.u}</span></div><div class="mm">${mm}</div>${spark(ser,s.c)}</div>`;
+    }).join("");
+  });
 }
-function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); render(); }
 
-function toast(t){ const m=$("msg"); m.textContent=t; m.style.display="block"; clearTimeout(toast.t); toast.t=setTimeout(()=>m.style.display="none",4000); }
+/* Historial */
+function renderHistory(){
+  $("chips").innerHTML=S.map(s=>`<button class="chip ${sel.has(s.f)?"act":""}" style="--c:${s.c}" onclick="tog('${s.f}')"><i></i>${s.l}</button>`).join("");
+  const act=S.filter(s=>sel.has(s.f)), units=[...new Set(act.map(s=>s.u))];
+  const scales={x:{ticks:{maxTicksLimit:8,color:"#68786d"},grid:{display:false}}};
+  units.forEach((u,i)=>scales[u]={position:i%2?"right":"left",title:{display:true,text:u,color:"#68786d"},ticks:{color:"#68786d"},grid:{color:i?"transparent":"#e6ece3"}});
+  const long=period!=="24h";
+  const labels=feeds.map(f=>{const d=new Date(f.created_at);return long?d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});});
+  const data={labels,datasets:act.map(s=>({label:`${s.l} (${s.u})`,data:feeds.map(f=>num(f[s.f])),borderColor:s.c,backgroundColor:s.c,yAxisID:s.u,pointRadius:0,borderWidth:2,tension:.3,spanGaps:true}))};
+  if(chart) chart.destroy();
+  chart=new Chart($("chart"),{type:"line",data,options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales,plugins:{legend:{display:false}}}});
+  $("foot").textContent=feeds.length+" lecturas · cada sensor tiene su propia escala";
+  let h="<tr><th>Sensor</th><th>Actual</th><th>Mínimo</th><th>Promedio</th><th>Máximo</th></tr>";
+  S.forEach(s=>{
+    const v=feeds.map(f=>num(f[s.f])).filter(x=>x!=null);
+    if(!v.length){h+=`<tr><td>${s.l}</td><td colspan="4" style="color:var(--mut)">Sin datos</td></tr>`;return;}
+    const avg=v.reduce((a,b)=>a+b,0)/v.length, f=x=>x.toFixed(s.d);
+    h+=`<tr><td><b style="color:${s.c}">●</b> ${s.l}</td><td>${f(v[v.length-1])} ${s.u}</td><td>${f(Math.min(...v))}</td><td>${f(avg)}</td><td>${f(Math.max(...v))}</td></tr>`;
+  });
+  $("stats").innerHTML=h;
+}
+function tog(f){ if(sel.has(f)){ if(sel.size>1) sel.delete(f); } else sel.add(f); renderHistory(); }
+function csv(){
+  if(!feeds.length) return toast("No hay datos para descargar");
+  const head=["fecha",...S.map(s=>s.l+" ("+s.u+")")].join(",");
+  const rows=feeds.map(f=>[f.created_at,...S.map(s=>num(f[s.f])??"")].join(","));
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([head+"\n"+rows.join("\n")],{type:"text/csv"}));
+  a.download="petoclaro_"+period+".csv"; a.click();
+}
+
+/* Control */
 function renderDevices(){
-  const lab={R1:"AUTO · por temperatura",R3:"AUTO · "+(saved?saved.on+" a "+saved.off:"horario")};
+  const lab={R1:"Automático · según temperatura",R3:"Automático · "+(saved?saved.on+" a "+saved.off:"según horario")};
   ["R1","R3"].forEach(id=>{
     const m=modes[id];
-    $("st-"+id).textContent=m==="AUTO"?lab[id]:m==="ON"?"MANUAL · ENCENDIDO":"MANUAL · APAGADO";
-    $("d-"+id).classList.toggle("lit",m!=="OFF");
-    $("seg-"+id).innerHTML=["AUTO","ON","OFF"].map(x=>`<button class="${x.toLowerCase()} ${m===x?"act":""}" ${busy?"disabled":""} onclick="setMode('${id}','${x}')">${x}</button>`).join("");
+    $("st-"+id).textContent=m==="AUTO"?lab[id]:m==="ON"?"Manual · encendido":"Manual · apagado";
+    $("seg-"+id).innerHTML=[["AUTO","Automático",""],["ON","Encender","on"],["OFF","Apagar","offb"]].map(([k,t,c])=>`<button class="${c} ${m===k?"act":""}" ${busy?"disabled":""} onclick="setMode('${id}','${k}')">${t}</button>`).join("");
   });
-  $("cnt").textContent=Object.values(modes).filter(m=>m!=="OFF").length+" ACTIVOS";
   $("saveBtn").disabled=busy;
 }
 async function cmd(commands){
@@ -128,55 +214,58 @@ async function cmd(commands){
   try{
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commands})});
     const j=await r.json(); ok=!!j.ok;
-    toast(ok?"Enviado · el Arduino lo aplica en ~"+commands.length*30+" s":"Error: "+(j.error||r.status));
-  }catch(e){ toast("Error de conexión con el panel"); }
+    toast(ok?"Enviado. La placa lo aplica en ~"+commands.length*30+" segundos.":"No se pudo enviar: "+(j.error||r.status));
+  }catch(e){ toast("No hay conexión con el panel."); }
   busy=false; renderDevices(); return ok;
 }
-async function setMode(id,m){
-  if(await cmd([id+"_"+m])){ modes[id]=m; localStorage.setItem("pc-modos",JSON.stringify(modes)); renderDevices(); }
-}
+async function setMode(id,m){ if(await cmd([id+"_"+m])){ modes[id]=m; localStorage.setItem("pc-modos",JSON.stringify(modes)); renderDevices(); } }
 function photo(){
   const t=s=>{const[a,b]=s.split(":").map(Number);return a*60+b;};
   const h=(t($("hoff").value)-t($("hon").value)+1440)%1440/60;
-  $("photo").textContent=`Fotoperíodo ${h}h luz / ${24-h}h oscuridad`+(h>=16?" · vegetativo":h<=12?" · floración":"");
+  $("photo").textContent=`${h} h de luz y ${24-h} h de oscuridad`+(h>=16?" (etapa vegetativa)":h<=12?" (etapa de floración)":"");
 }
 async function saveSched(){
   const on=$("hon").value, off=$("hoff").value;
   if(await cmd(["R3_HON_"+on.replace(":","_"),"R3_HOFF_"+off.replace(":","_"),"R3_AUTO"])){
     saved={on,off}; modes.R3="AUTO";
     localStorage.setItem("pc-horario",JSON.stringify(saved)); localStorage.setItem("pc-modos",JSON.stringify(modes));
-    $("last").textContent="Último horario: "+on+" a "+off+" · tarda ~90 s en aplicarse"; renderDevices();
+    $("last").textContent="Último horario enviado: "+on+" a "+off; renderDevices();
   }
 }
-try{ const m=JSON.parse(localStorage.getItem("pc-modos")||"null"); if(m) modes=m;
+try{
+  const m=JSON.parse(localStorage.getItem("pc-modos")||"null"); if(m) modes=m;
   const h=JSON.parse(localStorage.getItem("pc-horario")||"null");
-  if(h&&h.on&&h.off){ saved=h; $("hon").value=h.on; $("hoff").value=h.off; $("last").textContent="Último horario: "+h.on+" a "+h.off+" · tarda ~90 s en aplicarse"; } }catch(e){}
+  if(h&&h.on&&h.off){ saved=h; $("hon").value=h.on; $("hoff").value=h.off; $("last").textContent="Último horario enviado: "+h.on+" a "+h.off; }
+}catch(e){}
 renderDevices(); photo();
 
+/* Datos */
 async function loadHistory(p){
   period=p; ["24h","7d","30d"].forEach(x=>$("p"+x).classList.toggle("act",x===p));
+  if(p==="24h"){ feeds=day; renderHistory(); return; }
   try{
     const r=await fetch(BASE+"/api/public/history?range="+p), j=await r.json();
     if(!j.ok) throw new Error(j.error||r.status);
-    feeds=(j.readings||[]).map(x=>({created_at:x.recordedAt,field1:x.airTemperature,field2:x.airHumidity,field3:x.auxiliaryValue,field4:x.vpd,field5:x.soilTemperature20,field6:x.soilTemperature40,field7:x.soilHumidity20,field8:x.soilHumidity40}));
-    render();
+    feeds=cleanFeeds((j.readings||[]).map(x=>({created_at:x.recordedAt,field1:x.airTemperature,field2:x.airHumidity,field5:x.soilTemperature20,field6:x.soilTemperature40,field7:x.soilHumidity20,field8:x.soilHumidity40})));
+    renderHistory();
   }catch(e){
-    if(p!=="24h") toast("Publicá el panel para habilitar este período histórico");
-    await load();
+    toast("No se pudo cargar ese período. Mostrando las últimas 24 horas.");
+    period="24h"; ["24h","7d","30d"].forEach(x=>$("p"+x).classList.toggle("act",x==="24h")); feeds=day; renderHistory();
   }
 }
 async function load(){
   try{
     const r=await fetch(`https://api.thingspeak.com/channels/${CHANNEL}/feeds.json?api_key=${READ_KEY}&results=144`);
-    feeds=(await r.json()).feeds||[];
-    const l=feeds[feeds.length-1], ts=l?new Date(l.created_at):null, stale=!ts||Date.now()-ts>25*60000;
-    $("ts").textContent=ts?ts.toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"sin datos";
-    $("dot").classList.toggle("off",stale); $("live").textContent=stale?"Sin señal":"En línea";
+    day=cleanFeeds((await r.json()).feeds||[]);
+    const l=day[day.length-1], ts=l?new Date(l.created_at):null, stale=!ts||Date.now()-ts>25*60000;
+    $("ts").textContent=ts?"Última lectura: "+ts.toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sin datos";
+    $("badge").classList.toggle("off",stale); $("live").textContent=stale?"Sin señal":"En línea";
     $("alert").style.display=stale&&l?"block":"none";
-    render();
-  }catch(e){ $("ts").textContent="error al leer ThingSpeak"; }
+    renderState();
+    if(period==="24h"){ feeds=day; renderHistory(); }
+  }catch(e){ $("ts").textContent="No se pudo leer ThingSpeak"; }
 }
-loadHistory("24h"); setInterval(()=>loadHistory(period),60000);
+load(); setInterval(load,60000);
 </script>
 </body>
 </html>
